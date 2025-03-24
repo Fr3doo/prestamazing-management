@@ -33,13 +33,20 @@ const Navbar = () => {
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link 
           to="/" 
-          className={`transition-all duration-300 font-montserrat font-bold ${
+          className={`transition-all duration-300 font-montserrat font-bold flex items-center gap-2 ${
             isScrolled 
               ? 'text-primary text-xl' 
               : 'text-white text-2xl'
           }`}
         >
-          <span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span>
+          <img 
+            src="/lovable-uploads/4f776de8-d625-4296-b6aa-bbb3e23769e2.png" 
+            alt="Steve Presta Logo" 
+            className={`transition-all duration-300 ${
+              isScrolled ? 'h-8 w-8' : 'h-10 w-10'
+            }`}
+          />
+          <span><span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span></span>
         </Link>
 
         {/* Desktop Menu */}
