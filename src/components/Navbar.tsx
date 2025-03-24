@@ -27,29 +27,49 @@ const Navbar = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
           ? 'bg-white/95 backdrop-blur-md shadow-md py-3' 
-          : 'bg-transparent py-5'
+          : 'bg-primary/80 backdrop-blur-md border-b border-secondary/30 py-5'
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link 
           to="/" 
-          className="text-2xl font-montserrat font-bold text-primary"
+          className={`text-2xl font-montserrat font-bold ${isScrolled ? 'text-primary' : 'text-white'}`}
         >
           <span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span>
         </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="font-montserrat font-medium text-primary hover:text-secondary transition-colors">
+          <Link 
+            to="/" 
+            className={`font-montserrat font-medium ${
+              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+            } transition-colors`}
+          >
             Accueil
           </Link>
-          <Link to="/services" className="font-montserrat font-medium text-primary hover:text-secondary transition-colors">
+          <Link 
+            to="/services" 
+            className={`font-montserrat font-medium ${
+              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+            } transition-colors`}
+          >
             Services
           </Link>
-          <Link to="/about" className="font-montserrat font-medium text-primary hover:text-secondary transition-colors">
+          <Link 
+            to="/about" 
+            className={`font-montserrat font-medium ${
+              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+            } transition-colors`}
+          >
             À propos
           </Link>
-          <Link to="/contact" className="font-montserrat font-medium text-primary hover:text-secondary transition-colors">
+          <Link 
+            to="/contact" 
+            className={`font-montserrat font-medium ${
+              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+            } transition-colors`}
+          >
             Contact
           </Link>
           <a 
@@ -63,7 +83,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-primary"
+          className={`md:hidden ${isScrolled ? 'text-primary' : 'text-white'}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
