@@ -26,14 +26,18 @@ const Navbar = () => {
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-md py-3' 
+          ? 'bg-white/95 backdrop-blur-md shadow-md py-2' 
           : 'bg-primary/80 backdrop-blur-md border-b border-secondary/30 py-5'
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link 
           to="/" 
-          className={`text-2xl font-montserrat font-bold ${isScrolled ? 'text-primary' : 'text-white'}`}
+          className={`transition-all duration-300 font-montserrat font-bold ${
+            isScrolled 
+              ? 'text-primary text-xl' 
+              : 'text-white text-2xl'
+          }`}
         >
           <span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span>
         </Link>
@@ -43,7 +47,7 @@ const Navbar = () => {
           <Link 
             to="/" 
             className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
             } transition-colors`}
           >
             Accueil
@@ -51,7 +55,7 @@ const Navbar = () => {
           <Link 
             to="/services" 
             className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
             } transition-colors`}
           >
             Services
@@ -59,7 +63,7 @@ const Navbar = () => {
           <Link 
             to="/about" 
             className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
             } transition-colors`}
           >
             À propos
@@ -67,16 +71,18 @@ const Navbar = () => {
           <Link 
             to="/contact" 
             className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary' : 'text-white hover:text-secondary'
+              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
             } transition-colors`}
           >
             Contact
           </Link>
           <a 
             href="tel:+33600000000" 
-            className="flex items-center space-x-2 bg-secondary text-white px-4 py-2 rounded-lg transition-transform hover:translate-y-[-2px]"
+            className={`flex items-center space-x-2 bg-secondary text-white transition-all duration-300 rounded-lg hover:translate-y-[-2px] ${
+              isScrolled ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+            }`}
           >
-            <Phone size={18} />
+            <Phone size={isScrolled ? 16 : 18} />
             <span className="font-medium">Consultation gratuite</span>
           </a>
         </div>
