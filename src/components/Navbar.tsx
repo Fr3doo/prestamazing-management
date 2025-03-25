@@ -43,7 +43,7 @@ const Navbar = () => {
             src="/lovable-uploads/4f776de8-d625-4296-b6aa-bbb3e23769e2.png" 
             alt="Steve Presta Logo" 
             className={`transition-all duration-300 rounded-full object-contain ${
-              isScrolled ? 'h-10 w-10' : 'h-12 w-12'
+              isScrolled ? 'h-14 w-14' : 'h-16 w-16'
             }`}
           />
           <span><span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span></span>
