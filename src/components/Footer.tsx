@@ -10,7 +10,7 @@ const Footer = () => {
           {/* About Column */}
           <div>
             <h3 className="text-2xl font-montserrat font-bold mb-6">
-              <span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span>
+              <span className="text-secondary">S</span>teve <span className="text-secondary">PREST'A</span>
             </h3>
             <p className="text-gray-300 mb-6">
               Expert en management de la restauration, accompagnant les établissements vers l'excellence opérationnelle et l'optimisation de l'expérience client.
@@ -123,7 +123,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} Steve PRESTA. Tous droits réservés.
+            &copy; {new Date().getFullYear()} Steve PREST'A. Tous droits réservés.
           </p>
           <div className="flex space-x-6 text-sm text-gray-400">
             <Link to="/mentions-legales" className="hover:text-secondary transition-colors">
