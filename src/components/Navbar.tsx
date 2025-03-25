@@ -39,15 +39,13 @@ const Navbar = () => {
               : 'text-white text-2xl'
           }`}
         >
-          <div className="flex items-center justify-center">
-            <img 
-              src="/lovable-uploads/4f776de8-d625-4296-b6aa-bbb3e23769e2.png" 
-              alt="Steve Presta Logo" 
-              className={`transition-all duration-300 rounded-full object-contain ${
-                isScrolled ? 'h-16 w-16' : 'h-18 w-18'
-              }`}
-            />
-          </div>
+          <img 
+            src="/lovable-uploads/4f776de8-d625-4296-b6aa-bbb3e23769e2.png" 
+            alt="Steve Presta Logo" 
+            className={`transition-all duration-300 rounded-full object-contain ${
+              isScrolled ? 'h-14 w-14' : 'h-16 w-16'
+            }`}
+          />
           <span><span className="text-secondary">S</span>teve <span className="text-secondary">PRESTA</span></span>
         </Link>
 
