@@ -66,9 +66,13 @@ const Navbar = () => {
             to="/" 
             className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
               isScrolled 
-                ? 'text-primary hover:text-secondary text-sm' 
-                : 'text-white hover:text-secondary'
-            } ${isLinkActive('/') ? 'text-secondary font-bold' : ''}`}
+                ? isLinkActive('/') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-primary hover:text-secondary text-sm'
+                : isLinkActive('/') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-white hover:text-secondary'
+            }`}
           >
             Accueil
           </Link>
@@ -76,9 +80,13 @@ const Navbar = () => {
             to="/services" 
             className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
               isScrolled 
-                ? 'text-primary hover:text-secondary text-sm' 
-                : 'text-white hover:text-secondary'
-            } ${isLinkActive('/services') ? 'text-secondary font-bold' : ''}`}
+                ? isLinkActive('/services') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-primary hover:text-secondary text-sm'
+                : isLinkActive('/services') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-white hover:text-secondary'
+            }`}
           >
             Services
           </Link>
@@ -86,9 +94,13 @@ const Navbar = () => {
             to="/about" 
             className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
               isScrolled 
-                ? 'text-primary hover:text-secondary text-sm' 
-                : 'text-white hover:text-secondary'
-            } ${isLinkActive('/about') ? 'text-secondary font-bold' : ''}`}
+                ? isLinkActive('/about') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-primary hover:text-secondary text-sm' 
+                : isLinkActive('/about') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-white hover:text-secondary'
+            }`}
           >
             À propos
           </Link>
@@ -96,9 +108,13 @@ const Navbar = () => {
             to="/contact" 
             className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
               isScrolled 
-                ? 'text-primary hover:text-secondary text-sm' 
-                : 'text-white hover:text-secondary'
-            } ${isLinkActive('/contact') ? 'text-secondary font-bold' : ''}`}
+                ? isLinkActive('/contact') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-primary hover:text-secondary text-sm'
+                : isLinkActive('/contact') 
+                  ? 'text-secondary font-bold border-b-2 border-secondary' 
+                  : 'text-white hover:text-secondary'
+            }`}
           >
             Contact
           </Link>
@@ -129,7 +145,7 @@ const Navbar = () => {
             <Link 
               to="/" 
               className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
-                isLinkActive('/') ? 'text-secondary font-bold' : 'text-primary'
+                isLinkActive('/') ? 'text-secondary font-bold border-l-4 border-l-secondary pl-3' : 'text-primary'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -138,7 +154,7 @@ const Navbar = () => {
             <Link 
               to="/services" 
               className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
-                isLinkActive('/services') ? 'text-secondary font-bold' : 'text-primary'
+                isLinkActive('/services') ? 'text-secondary font-bold border-l-4 border-l-secondary pl-3' : 'text-primary'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -147,7 +163,7 @@ const Navbar = () => {
             <Link 
               to="/about" 
               className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
-                isLinkActive('/about') ? 'text-secondary font-bold' : 'text-primary'
+                isLinkActive('/about') ? 'text-secondary font-bold border-l-4 border-l-secondary pl-3' : 'text-primary'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -156,7 +172,7 @@ const Navbar = () => {
             <Link 
               to="/contact" 
               className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
-                isLinkActive('/contact') ? 'text-secondary font-bold' : 'text-primary'
+                isLinkActive('/contact') ? 'text-secondary font-bold border-l-4 border-l-secondary pl-3' : 'text-primary'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
