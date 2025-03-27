@@ -28,6 +28,11 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [location]);
 
+  // Helper function to determine if a link is active
+  const isLinkActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -59,33 +64,41 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-8">
           <Link 
             to="/" 
-            className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/' ? 'text-secondary' : ''}`}
+            className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
+              isScrolled 
+                ? 'text-primary hover:text-secondary text-sm' 
+                : 'text-white hover:text-secondary'
+            } ${isLinkActive('/') ? 'text-secondary font-bold' : ''}`}
           >
             Accueil
           </Link>
           <Link 
             to="/services" 
-            className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/services' ? 'text-secondary' : ''}`}
+            className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
+              isScrolled 
+                ? 'text-primary hover:text-secondary text-sm' 
+                : 'text-white hover:text-secondary'
+            } ${isLinkActive('/services') ? 'text-secondary font-bold' : ''}`}
           >
             Services
           </Link>
           <Link 
             to="/about" 
-            className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/about' ? 'text-secondary' : ''}`}
+            className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
+              isScrolled 
+                ? 'text-primary hover:text-secondary text-sm' 
+                : 'text-white hover:text-secondary'
+            } ${isLinkActive('/about') ? 'text-secondary font-bold' : ''}`}
           >
             À propos
           </Link>
           <Link 
             to="/contact" 
-            className={`font-montserrat font-medium ${
-              isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/contact' ? 'text-secondary' : ''}`}
+            className={`font-montserrat font-medium transition-colors active:scale-95 active:opacity-70 ${
+              isScrolled 
+                ? 'text-primary hover:text-secondary text-sm' 
+                : 'text-white hover:text-secondary'
+            } ${isLinkActive('/contact') ? 'text-secondary font-bold' : ''}`}
           >
             Contact
           </Link>
@@ -115,28 +128,36 @@ const Navbar = () => {
           <div className="flex flex-col space-y-6">
             <Link 
               to="/" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
+                isLinkActive('/') ? 'text-secondary font-bold' : 'text-primary'
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Accueil
             </Link>
             <Link 
               to="/services" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/services' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
+                isLinkActive('/services') ? 'text-secondary font-bold' : 'text-primary'
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link 
               to="/about" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/about' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
+                isLinkActive('/about') ? 'text-secondary font-bold' : 'text-primary'
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               À propos
             </Link>
             <Link 
               to="/contact" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/contact' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${
+                isLinkActive('/contact') ? 'text-secondary font-bold' : 'text-primary'
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
