@@ -61,7 +61,7 @@ const Navbar = () => {
             to="/" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors`}
+            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/' ? 'text-secondary' : ''}`}
           >
             Accueil
           </Link>
@@ -69,7 +69,7 @@ const Navbar = () => {
             to="/services" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors ${location.pathname === '/services' ? 'text-secondary' : ''}`}
+            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/services' ? 'text-secondary' : ''}`}
           >
             Services
           </Link>
@@ -77,7 +77,7 @@ const Navbar = () => {
             to="/about" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors ${location.pathname === '/about' ? 'text-secondary' : ''}`}
+            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/about' ? 'text-secondary' : ''}`}
           >
             À propos
           </Link>
@@ -85,13 +85,13 @@ const Navbar = () => {
             to="/contact" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors ${location.pathname === '/contact' ? 'text-secondary' : ''}`}
+            } transition-colors active:scale-95 active:opacity-70 ${location.pathname === '/contact' ? 'text-secondary' : ''}`}
           >
             Contact
           </Link>
           <a 
             href="tel:+33600000000" 
-            className={`flex items-center space-x-2 bg-secondary text-white transition-all duration-300 rounded-lg hover:translate-y-[-2px] ${
+            className={`flex items-center space-x-2 bg-secondary text-white transition-all duration-300 rounded-lg hover:translate-y-[-2px] active:translate-y-[0px] active:bg-secondary/80 ${
               isScrolled ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
             }`}
           >
@@ -102,7 +102,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button 
-          className={`md:hidden ${isScrolled ? 'text-primary' : 'text-white'}`}
+          className={`md:hidden ${isScrolled ? 'text-primary' : 'text-white'} active:scale-90 transition-transform`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -115,35 +115,35 @@ const Navbar = () => {
           <div className="flex flex-col space-y-6">
             <Link 
               to="/" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Accueil
             </Link>
             <Link 
               to="/services" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/services' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/services' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link 
               to="/about" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/about' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/about' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               À propos
             </Link>
             <Link 
               to="/contact" 
-              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/contact' ? 'text-secondary' : 'text-primary'}`}
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 active:text-secondary/80 active:translate-x-1 transition-transform ${location.pathname === '/contact' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
             </Link>
             <a 
               href="tel:+33600000000" 
-              className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-3 rounded-lg mt-4"
+              className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-3 rounded-lg mt-4 active:bg-secondary/80 active:scale-98 transition-all"
               onClick={() => setIsMenuOpen(false)}
             >
               <Phone size={18} />
