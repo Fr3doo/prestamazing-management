@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +22,11 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Close mobile menu when location changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location]);
 
   return (
     <nav 
@@ -63,7 +69,7 @@ const Navbar = () => {
             to="/services" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors`}
+            } transition-colors ${location.pathname === '/services' ? 'text-secondary' : ''}`}
           >
             Services
           </Link>
@@ -71,7 +77,7 @@ const Navbar = () => {
             to="/about" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors`}
+            } transition-colors ${location.pathname === '/about' ? 'text-secondary' : ''}`}
           >
             À propos
           </Link>
@@ -79,7 +85,7 @@ const Navbar = () => {
             to="/contact" 
             className={`font-montserrat font-medium ${
               isScrolled ? 'text-primary hover:text-secondary text-sm' : 'text-white hover:text-secondary'
-            } transition-colors`}
+            } transition-colors ${location.pathname === '/contact' ? 'text-secondary' : ''}`}
           >
             Contact
           </Link>
@@ -109,28 +115,28 @@ const Navbar = () => {
           <div className="flex flex-col space-y-6">
             <Link 
               to="/" 
-              className="font-montserrat text-xl font-medium text-primary py-3 border-b border-gray-100"
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Accueil
             </Link>
             <Link 
               to="/services" 
-              className="font-montserrat text-xl font-medium text-primary py-3 border-b border-gray-100"
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/services' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link 
               to="/about" 
-              className="font-montserrat text-xl font-medium text-primary py-3 border-b border-gray-100"
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/about' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               À propos
             </Link>
             <Link 
               to="/contact" 
-              className="font-montserrat text-xl font-medium text-primary py-3 border-b border-gray-100"
+              className={`font-montserrat text-xl font-medium py-3 border-b border-gray-100 ${location.pathname === '/contact' ? 'text-secondary' : 'text-primary'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
