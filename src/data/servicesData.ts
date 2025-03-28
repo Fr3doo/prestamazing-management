@@ -2,7 +2,7 @@
 import { ServiceDetailProps } from '@/components/ServiceDetail';
 
 // Define the service data without JSX
-const servicesData: Omit<ServiceDetailProps, 'icon'>[] & { iconName: string }[] = [
+const servicesData: ServiceDetailProps[] = [
   {
     id: "team-management",
     title: "Management d'équipe",

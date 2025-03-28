@@ -10,13 +10,9 @@ export interface ServiceDetailProps {
   description: string;
   benefits: string[];
   image: string;
-  icon: React.ReactNode;
-  reverse?: boolean;
-}
-
-interface ServiceDetailComponentProps extends Omit<ServiceDetailProps, 'icon'> {
-  icon?: React.ReactNode;
   iconName?: string;
+  icon?: React.ReactNode;
+  reverse?: boolean;
 }
 
 const ServiceDetail = ({ 
@@ -28,14 +24,15 @@ const ServiceDetail = ({
   icon, 
   iconName, 
   reverse = false 
-}: ServiceDetailComponentProps) => {
+}: ServiceDetailProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   
   // Render the icon based on iconName if provided
   const renderIcon = () => {
     if (icon) return icon;
     if (iconName && iconName in LucideIcons) {
-      const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons];
+      // Type assertion to access the icon component safely
+      const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ size?: number }>>)[iconName];
       return <IconComponent size={32} />;
     }
     return null;
