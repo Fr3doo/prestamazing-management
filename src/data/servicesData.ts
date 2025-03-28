@@ -1,8 +1,8 @@
 
-import { Users, Calendar, BarChart3, Heart } from 'lucide-react';
 import { ServiceDetailProps } from '@/components/ServiceDetail';
 
-const servicesData: ServiceDetailProps[] = [
+// Define the service data without JSX
+const servicesData: Omit<ServiceDetailProps, 'icon'>[] & { iconName: string }[] = [
   {
     id: "team-management",
     title: "Management d'équipe",
@@ -15,7 +15,7 @@ const servicesData: ServiceDetailProps[] = [
       "Création d'une culture d'entreprise forte et cohérente"
     ],
     image: "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    icon: <Users size={32} />
+    iconName: "Users"
   },
   {
     id: "event-organization",
@@ -29,7 +29,7 @@ const servicesData: ServiceDetailProps[] = [
       "Analyse post-événement et recommandations d'amélioration"
     ],
     image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1469&q=80",
-    icon: <Calendar size={32} />,
+    iconName: "Calendar",
     reverse: true
   },
   {
@@ -44,7 +44,7 @@ const servicesData: ServiceDetailProps[] = [
       "Formation des équipes aux nouvelles procédures"
     ],
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    icon: <BarChart3 size={32} />
+    iconName: "BarChart3"
   },
   {
     id: "customer-experience",
@@ -58,7 +58,7 @@ const servicesData: ServiceDetailProps[] = [
       "Gestion proactive des avis clients et de la réputation"
     ],
     image: "https://images.unsplash.com/photo-1607117121584-0e34475b7604?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    icon: <Heart size={32} />,
+    iconName: "Heart",
     reverse: true
   }
 ];

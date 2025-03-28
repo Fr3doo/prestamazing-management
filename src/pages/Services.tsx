@@ -43,7 +43,7 @@ const Services = () => {
             description={service.description}
             benefits={service.benefits}
             image={service.image}
-            icon={service.icon}
+            iconName={service.iconName}
             reverse={service.reverse}
           />
         ))}

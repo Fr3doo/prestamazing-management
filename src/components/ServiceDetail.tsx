@@ -2,6 +2,7 @@
 import { CheckCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import * as LucideIcons from 'lucide-react';
 
 export interface ServiceDetailProps {
   id: string;
@@ -13,8 +14,32 @@ export interface ServiceDetailProps {
   reverse?: boolean;
 }
 
-const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse = false }: ServiceDetailProps) => {
+interface ServiceDetailComponentProps extends Omit<ServiceDetailProps, 'icon'> {
+  icon?: React.ReactNode;
+  iconName?: string;
+}
+
+const ServiceDetail = ({ 
+  id, 
+  title, 
+  description, 
+  benefits, 
+  image, 
+  icon, 
+  iconName, 
+  reverse = false 
+}: ServiceDetailComponentProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  
+  // Render the icon based on iconName if provided
+  const renderIcon = () => {
+    if (icon) return icon;
+    if (iconName && iconName in LucideIcons) {
+      const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons];
+      return <IconComponent size={32} />;
+    }
+    return null;
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -45,7 +70,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
           <div className="flex items-center space-x-3 mb-6">
             <div className="text-secondary">
-              {icon}
+              {renderIcon()}
             </div>
             <h2 className="text-3xl md:text-4xl font-montserrat font-bold text-primary">
               {title}
