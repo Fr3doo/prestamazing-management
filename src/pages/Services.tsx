@@ -90,16 +90,20 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
 
 const Services = () => {
   useEffect(() => {
+    window.scrollTo(0, 0);
+    
     // Scroll to section if hash is present in URL
     if (window.location.hash) {
       const id = window.location.hash.substring(1);
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     }
 
-    // Add this to ensure content is visible
+    // Ensure content is visible
     document.body.style.overflow = 'auto';
   }, []);
 
@@ -165,7 +169,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="pt-16">
+    <div className="min-h-screen">
       <Hero 
         title="Nos Services"
         subtitle="Des solutions de management sur mesure pour transformer votre établissement et élever l'expérience client."
