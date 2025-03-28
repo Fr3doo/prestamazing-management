@@ -169,7 +169,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Hero 
         title="Nos Services"
         subtitle="Des solutions de management sur mesure pour transformer votre établissement et élever l'expérience client."
