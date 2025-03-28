@@ -31,8 +31,8 @@ const ServiceDetail = ({
   const renderIcon = () => {
     if (icon) return icon;
     if (iconName && iconName in LucideIcons) {
-      // Type assertion to access the icon component safely
-      const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ size?: number }>>)[iconName];
+      // Utiliser une approche plus sûre pour le typage
+      const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons];
       return <IconComponent size={32} />;
     }
     return null;
