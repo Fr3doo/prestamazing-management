@@ -41,7 +41,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
   }, []);
 
   return (
-    <section id={id} ref={sectionRef} className="py-20 border-b border-gray-100 last:border-0">
+    <section id={id} ref={sectionRef} className="py-20 border-b border-gray-100 last:border-0 bg-white">
       <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
           <div className="flex items-center space-x-3 mb-6">
