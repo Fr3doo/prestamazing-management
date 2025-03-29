@@ -2,6 +2,7 @@
 import { Users, Calendar, BarChart3, Heart, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 export interface ServiceDetailProps {
   id: string;
@@ -43,7 +44,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
     <section 
       id={id} 
       ref={sectionRef} 
-      className="py-12 md:py-16 border-b border-gray-100 last:border-0 bg-white"
+      className="py-12 md:py-16 border-b border-gray-100 last:border-0 bg-white relative"
     >
       <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
@@ -78,12 +79,14 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
         </div>
         
         <div className={`reveal ${reverse ? 'lg:order-1' : 'lg:order-2'}`}>
-          <div className="rounded-xl overflow-hidden shadow-elegant transform transition-transform hover:scale-[1.02] duration-500">
-            <img 
-              src={image} 
-              alt={title} 
-              className="w-full h-full object-cover aspect-[4/3]"
-            />
+          <div className="rounded-xl overflow-hidden shadow-elegant transform transition-transform hover:scale-[1.02] duration-500 bg-white">
+            <AspectRatio ratio={4/3} className="w-full">
+              <img 
+                src={image} 
+                alt={title} 
+                className="w-full h-full object-cover"
+              />
+            </AspectRatio>
           </div>
         </div>
       </div>

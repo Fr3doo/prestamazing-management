@@ -86,7 +86,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Hero 
         title="Nos Services"
         subtitle="Des solutions de management sur mesure pour transformer votre établissement et élever l'expérience client."
@@ -95,7 +95,7 @@ const Services = () => {
         backgroundImage="https://images.unsplash.com/photo-1581349485608-9469926a8e5e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1464&q=80"
       />
       
-      <div className="bg-white flex flex-col relative z-10 flex-grow">
+      <div className="flex flex-col flex-grow relative z-10">
         {services.map((service) => (
           <ServiceDetail 
             key={service.id}
