@@ -51,12 +51,12 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
             <div className="text-secondary">
               {icon}
             </div>
-            <h2 className="text-3xl md:text-4xl font-montserrat font-bold text-primary">
+            <h2 className="text-3xl md:text-4xl font-montserrat font-bold text-navy">
               {title}
             </h2>
           </div>
           
-          <p className="text-gray-600 mb-6">
+          <p className="text-navy/80 mb-6">
             {description}
           </p>
           
@@ -64,7 +64,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <CheckCircle className="text-secondary mt-1 flex-shrink-0" size={20} />
-                <p className="text-gray-700">{benefit}</p>
+                <p className="text-navy/90">{benefit}</p>
               </div>
             ))}
           </div>
