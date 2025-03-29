@@ -40,10 +40,14 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
   }, []);
 
   return (
-    <section id={id} ref={sectionRef} className="py-16 md:py-20 border-b border-gray-100 last:border-0 bg-white">
-      <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
+    <section 
+      id={id} 
+      ref={sectionRef} 
+      className="py-12 md:py-16 border-b border-gray-100 last:border-0 bg-white"
+    >
+      <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
-          <div className="flex items-center space-x-3 mb-6">
+          <div className="flex items-center space-x-3 mb-4">
             <div className="text-secondary">
               {icon}
             </div>
@@ -52,11 +56,11 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
             </h2>
           </div>
           
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-6">
             {description}
           </p>
           
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-6">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <CheckCircle className="text-secondary mt-1 flex-shrink-0" size={20} />
