@@ -41,7 +41,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
   }, []);
 
   return (
-    <section id={id} ref={sectionRef} className="py-20 border-b border-gray-100 last:border-0 bg-white">
+    <section id={id} ref={sectionRef} className="py-16 md:py-20 border-b border-gray-100 last:border-0 bg-white">
       <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
           <div className="flex items-center space-x-3 mb-6">
@@ -169,7 +169,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Hero 
         title="Nos Services"
         subtitle="Des solutions de management sur mesure pour transformer votre établissement et élever l'expérience client."
@@ -178,7 +178,7 @@ const Services = () => {
         backgroundImage="https://images.unsplash.com/photo-1581349485608-9469926a8e5e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1464&q=80"
       />
       
-      <div className="bg-white relative z-10">
+      <div className="bg-white relative z-10 flex-grow">
         {services.map((service) => (
           <ServiceDetail 
             key={service.id}
