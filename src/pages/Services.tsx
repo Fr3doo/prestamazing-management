@@ -22,6 +22,15 @@ const Services = () => {
 
     // Ensure content is visible
     document.body.style.overflow = 'auto';
+    
+    // Fallback to make sure all reveal elements are visible
+    setTimeout(() => {
+      document.querySelectorAll('.reveal').forEach((el) => {
+        if (!el.classList.contains('active')) {
+          el.classList.add('active');
+        }
+      });
+    }, 1000);
   }, []);
 
   const services = [

@@ -16,13 +16,23 @@ export interface ServiceDetailProps {
 
 const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse = false }: ServiceDetailProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const contentRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            // Activate the section itself
             entry.target.classList.add('active');
+            
+            // Also activate all reveal elements inside this section
+            if (entry.target === sectionRef.current) {
+              const revealElements = entry.target.querySelectorAll('.reveal');
+              revealElements.forEach(el => {
+                el.classList.add('active');
+              });
+            }
           }
         });
       },
