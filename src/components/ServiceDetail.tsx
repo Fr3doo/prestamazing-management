@@ -16,37 +16,22 @@ export interface ServiceDetailProps {
 
 const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse = false }: ServiceDetailProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const contentRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Activate the section itself
-            entry.target.classList.add('active');
-            
-            // Also activate all reveal elements inside this section
-            if (entry.target === sectionRef.current) {
-              const revealElements = entry.target.querySelectorAll('.reveal');
-              revealElements.forEach(el => {
-                el.classList.add('active');
-              });
-            }
-          }
+          entry.target.classList.toggle('active', entry.isIntersecting);
         });
       },
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    const revealElements = sectionRef.current?.querySelectorAll('.reveal');
+    revealElements?.forEach((el) => observer.observe(el));
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
+      revealElements?.forEach((el) => observer.unobserve(el));
     };
   }, []);
 
@@ -57,6 +42,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
       className="py-12 md:py-16 border-b border-gray-100 last:border-0 bg-white relative"
     >
       <div className={`container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
+        
         <div className={`reveal ${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
           <div className="flex items-center space-x-3 mb-4">
             <div className="text-secondary">
@@ -87,7 +73,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
             En savoir plus
           </Link>
         </div>
-        
+
         <div className={`reveal ${reverse ? 'lg:order-1' : 'lg:order-2'}`}>
           <div className="rounded-xl overflow-hidden shadow-elegant transform transition-transform hover:scale-[1.02] duration-500 bg-white">
             <AspectRatio ratio={4/3} className="w-full">
@@ -99,6 +85,7 @@ const ServiceDetail = ({ id, title, description, benefits, image, icon, reverse 
             </AspectRatio>
           </div>
         </div>
+
       </div>
     </section>
   );
