@@ -1,7 +1,6 @@
 
 import { ArrowDown } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 
 interface HeroProps {
   title: string;
@@ -14,7 +13,6 @@ interface HeroProps {
 const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const elementsRef = useRef<(HTMLElement | null)[]>([]);
-  const location = useLocation();
 
   useEffect(() => {
     observer.current = new IntersectionObserver((entries) => {
@@ -37,31 +35,9 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
     };
   }, []);
 
-  // Détermine quelle classe utiliser selon la page actuelle
-  const getHeroHeight = () => {
-    const path = location.pathname;
-    // Les pages 'about' et 'contact' auront une hauteur plus courte
-    if (path === '/about' || path === '/contact') {
-      return "min-h-[90vh]";
-    }
-    // Les pages d'accueil et services auront une hauteur complète
-    return "min-h-screen";
-  };
-
-  // Détermine la position de la flèche selon la page actuelle
-  const getArrowPosition = () => {
-    const path = location.pathname;
-    // Position plus haute pour about et contact
-    if (path === '/about' || path === '/contact') {
-      return "bottom-16";
-    }
-    // Position standard pour les autres pages
-    return "bottom-20";
-  };
-
   return (
     <section 
-      className={`relative ${getHeroHeight()} flex items-center justify-center overflow-hidden`}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
         backgroundImage: backgroundImage 
           ? `linear-gradient(rgba(27, 60, 89, 0.85), rgba(27, 60, 89, 0.95)), url(${backgroundImage})` 
@@ -102,7 +78,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
       
       <a 
         href="#key-features"
-        className={`absolute ${getArrowPosition()} left-1/2 transform -translate-x-1/2 text-white opacity-80 hover:opacity-100 transition-opacity animate-bounce z-10`}
+        className="absolute bottom-24 left-1/2 transform -translate-x-1/2 text-white opacity-80 hover:opacity-100 transition-opacity animate-bounce z-10"
       >
         <ArrowDown size={32} />
       </a>
