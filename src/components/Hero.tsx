@@ -78,7 +78,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
       
       <a 
         href="#key-features"
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white opacity-80 hover:opacity-100 transition-opacity animate-bounce"
+        className="absolute bottom-24 left-1/2 transform -translate-x-1/2 text-white opacity-80 hover:opacity-100 transition-opacity animate-bounce z-10"
       >
         <ArrowDown size={32} />
       </a>
