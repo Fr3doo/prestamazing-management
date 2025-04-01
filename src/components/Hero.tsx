@@ -37,7 +37,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
 
   return (
     <section 
-      className="relative h-[100vh] flex flex-col overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       style={{
         backgroundImage: backgroundImage 
           ? `linear-gradient(rgba(27, 60, 89, 0.85), rgba(27, 60, 89, 0.95)), url(${backgroundImage})` 
@@ -50,37 +50,34 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(196,167,125,0.1)_0,rgba(27,60,89,0)_70%)]"></div>
       </div>
       
-      {/* Contenu principal centré verticalement */}
-      <div className="flex-grow flex items-center justify-center z-10">
-        <div className="container mx-auto px-6 text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            <h1 
-              ref={el => elementsRef.current[0] = el}
-              className="font-montserrat font-bold mb-6 tracking-tight reveal"
-            >
-              {title}
-            </h1>
-            
-            <p 
-              ref={el => elementsRef.current[1] = el}
-              className="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto reveal"
-            >
-              {subtitle}
-            </p>
-            
-            <a
-              ref={el => elementsRef.current[2] = el}
-              href={ctaLink}
-              className="inline-block bg-secondary text-white font-montserrat font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-300 hover:shadow-[0_10px_25px_-10px_rgba(196,167,125,0.5)] hover:translate-y-[-3px] reveal"
-            >
-              {ctaText}
-            </a>
-          </div>
+      <div className="container mx-auto px-6 py-24 text-center text-white z-10 flex-grow flex flex-col justify-center items-center">
+        <div className="max-w-4xl mx-auto">
+          <h1 
+            ref={el => elementsRef.current[0] = el}
+            className="font-montserrat font-bold mb-6 tracking-tight reveal"
+          >
+            {title}
+          </h1>
+          
+          <p 
+            ref={el => elementsRef.current[1] = el}
+            className="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto reveal"
+          >
+            {subtitle}
+          </p>
+          
+          <a
+            ref={el => elementsRef.current[2] = el}
+            href={ctaLink}
+            className="inline-block bg-secondary text-white font-montserrat font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-300 hover:shadow-[0_10px_25px_-10px_rgba(196,167,125,0.5)] hover:translate-y-[-3px] reveal"
+          >
+            {ctaText}
+          </a>
         </div>
       </div>
       
-      {/* Zone de bas de page avec flèche, hauteur fixe */}
-      <div className="h-[100px] flex justify-center items-center z-10">
+      {/* Arrow down with fixed position */}
+      <div className="w-full flex justify-center pb-8 md:pb-12 z-10">
         <a 
           href="#key-features"
           className="text-white opacity-80 hover:opacity-100 transition-opacity animate-bounce"
