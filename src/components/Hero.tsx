@@ -37,7 +37,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
 
   return (
     <section 
-      className="relative h-[100vh] flex flex-col overflow-hidden"
+      className="relative h-screen flex flex-col overflow-hidden"
       style={{
         backgroundImage: backgroundImage 
           ? `linear-gradient(rgba(27, 60, 89, 0.85), rgba(27, 60, 89, 0.95)), url(${backgroundImage})` 
@@ -51,7 +51,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
       </div>
       
       {/* Contenu principal centré verticalement */}
-      <div className="flex-grow flex items-center justify-center z-10">
+      <div className="flex-1 flex items-center justify-center z-10">
         <div className="container mx-auto px-6 text-center text-white">
           <div className="max-w-4xl mx-auto">
             <h1 
