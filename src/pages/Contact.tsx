@@ -45,7 +45,7 @@ const Contact = () => {
   ];
 
   return (
-    <div className="pt-16">
+    <div>
       <Hero 
         title="Contactez-nous"
         subtitle="Prenez rendez-vous pour une consultation gratuite et découvrez comment transformer votre établissement."

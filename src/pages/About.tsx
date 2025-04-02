@@ -1,4 +1,3 @@
-
 import Hero from '@/components/Hero';
 import Timeline from '@/components/Timeline';
 import { Award, BookOpen, Briefcase, Heart } from 'lucide-react';
@@ -98,7 +97,7 @@ const About = () => {
   }, []);
 
   return (
-    <div className="pt-16">
+    <div>
       <Hero 
         title="À propos de Steve PRESTA"
         subtitle="Expert en management de la restauration, passionné par l'excellence du service et l'optimisation de l'expérience client."
