@@ -51,7 +51,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(196,167,125,0.1)_0,rgba(27,60,89,0)_70%)]"></div>
       </div>
       
-      <div className="container mx-auto px-6 py-24 text-center text-white z-10 flex-grow flex flex-col justify-center items-center overflow-auto">
+      <div className="container mx-auto px-6 text-center text-white z-10 flex-grow flex flex-col justify-center items-center overflow-auto">
         <div className="max-w-4xl mx-auto">
           <h1 
             ref={el => elementsRef.current[0] = el}
