@@ -74,7 +74,7 @@ const Timeline = () => {
         <div
           key={index}
           ref={(el) => (itemsRef.current[index] = el)}
-          className={`relative flex items-center mb-12 last:mb-0 reveal ${
+          className={`relative flex items-center mb-12 last:mb-0 opacity-100 ${
             index % 2 === 0 ? 'justify-start md:justify-end' : 'justify-start'
           }`}
         >

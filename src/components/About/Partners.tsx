@@ -5,10 +5,10 @@ const Partners = () => {
   return (
     <section className="section-padding bg-white">
       <div className="text-center mb-16">
-        <h2 className="text-primary mb-6 reveal">
+        <h2 className="text-primary mb-6">
           Partenaires & <span className="text-secondary">Références</span>
         </h2>
-        <p className="max-w-3xl mx-auto text-gray-600 reveal">
+        <p className="max-w-3xl mx-auto text-gray-600">
           J'ai eu le privilège de collaborer avec ces établissements prestigieux et organisations de référence.
         </p>
       </div>

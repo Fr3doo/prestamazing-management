@@ -23,10 +23,10 @@ const About = () => {
       
       <section className="section-padding bg-white">
         <div className="text-center mb-16">
-          <h2 className="text-primary mb-6 reveal">
+          <h2 className="text-primary mb-6">
             Parcours <span className="text-secondary">Professionnel</span>
           </h2>
-          <p className="max-w-3xl mx-auto text-gray-600 reveal">
+          <p className="max-w-3xl mx-auto text-gray-600">
             Découvrez les étapes clés de mon évolution professionnelle et les expériences 
             qui ont forgé mon expertise en management de la restauration.
           </p>
