@@ -77,8 +77,8 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
         </div>
       </div>
       
-      {/* Arrow down with mt-auto to push it to the bottom */}
-      <div className="mt-auto mb-12 z-10 animate-bounce">
+      {/* Arrow down with mt-auto to push it to the bottom - increased mb from 12 to 24 */}
+      <div className="mt-auto mb-24 z-10 animate-bounce">
         <a 
           href="#key-features"
           className="text-white opacity-80 hover:opacity-100 transition-opacity"
