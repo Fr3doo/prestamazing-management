@@ -88,7 +88,7 @@ const Services = () => {
         "Mise en place de programmes de fidélité efficaces",
         "Gestion proactive des avis clients et de la réputation"
       ],
-      image: "https://images.unsplash.com/photo-1607117121584-0e34475b7604?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
+      image: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
       icon: <Heart size={32} />,
       reverse: true
     }
