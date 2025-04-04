@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -9,11 +8,6 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  // Scroll to top when navigating to a new page
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen pt-16">
       <Navbar />
