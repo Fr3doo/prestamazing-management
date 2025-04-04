@@ -28,6 +28,18 @@ const Testimonials = () => {
       author: "Sophie Marchand",
       position: "Responsable Événementiel",
       company: "Grand Hôtel Paris"
+    },
+    {
+      content: "La formation de notre personnel par Steve a complètement changé l'ambiance de notre établissement. Les clients remarquent la différence et nos réservations ont augmenté de 40% en seulement deux mois.",
+      author: "Jean Dupont",
+      position: "Chef propriétaire",
+      company: "L'Atelier Gourmand"
+    },
+    {
+      content: "Steve a su identifier rapidement les points faibles de notre service et proposer des solutions concrètes. Sa vision stratégique et son approche personnalisée ont été déterminantes pour retrouver notre excellence opérationnelle.",
+      author: "Isabelle Moreau",
+      position: "Directrice Générale",
+      company: "Le Comptoir des Saveurs"
     }
   ];
 
