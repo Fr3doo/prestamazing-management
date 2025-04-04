@@ -107,25 +107,29 @@ const Testimonials = () => {
       <div className="relative max-w-4xl mx-auto">
         <div className="overflow-hidden">
           <div 
-            className={`transition-all duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+            className={`flex transition-all duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
             style={{ transform: `translateX(-${activeIndex * 100}%)` }}
           >
-            <div className="glass-card p-10 md:p-12 relative">
-              <Quote className="text-secondary/20 absolute top-6 left-6" size={60} />
-              
-              <div className="text-lg md:text-xl text-gray-700 mb-8 relative z-10">
-                "{testimonials[activeIndex].content}"
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="w-full flex-shrink-0">
+                <div className="glass-card p-10 md:p-12 relative">
+                  <Quote className="text-secondary/20 absolute top-6 left-6" size={60} />
+                  
+                  <div className="text-lg md:text-xl text-gray-700 mb-8 relative z-10">
+                    "{testimonial.content}"
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <p className="font-montserrat font-semibold text-primary text-lg">
+                      {testimonial.author}
+                    </p>
+                    <p className="text-gray-600">
+                      {testimonial.position}, <span className="text-secondary">{testimonial.company}</span>
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex flex-col items-center">
-                <p className="font-montserrat font-semibold text-primary text-lg">
-                  {testimonials[activeIndex].author}
-                </p>
-                <p className="text-gray-600">
-                  {testimonials[activeIndex].position}, <span className="text-secondary">{testimonials[activeIndex].company}</span>
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
