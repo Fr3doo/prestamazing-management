@@ -1,4 +1,3 @@
-
 import { ArrowDown } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
@@ -37,7 +36,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
 
   return (
     <section 
-      className="relative flex flex-col items-center justify-center overflow-hidden pt-20 md:pt-0"
+      className="relative flex flex-col items-center justify-center overflow-hidden pt-20 md:pt-16 lg:pt-0"
       style={{
         height: '100vh', // Fixed height instead of min-height
         backgroundImage: backgroundImage 
@@ -77,7 +76,6 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
         </div>
       </div>
       
-      {/* Arrow down with mt-auto to push it to the bottom - increased mb from 12 to 24 */}
       <div className="mt-auto mb-24 z-10 animate-bounce">
         <a 
           href="#key-features"
@@ -87,7 +85,6 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
         </a>
       </div>
       
-      {/* Premium design element: Decorative line */}
       <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-50"></div>
     </section>
   );
