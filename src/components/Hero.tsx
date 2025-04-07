@@ -37,7 +37,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, backgroundImage }: HeroProps)
 
   return (
     <section 
-      className="relative flex flex-col items-center justify-center overflow-hidden pt-16 md:pt-0"
+      className="relative flex flex-col items-center justify-center overflow-hidden pt-20 md:pt-0"
       style={{
         height: '100vh', // Fixed height instead of min-height
         backgroundImage: backgroundImage 
