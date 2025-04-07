@@ -19,7 +19,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white z-40 pt-16 p-6 md:hidden animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 h-screen bg-white z-40 pt-16 p-6 md:hidden animate-fade-in overflow-y-auto">
       <div className="flex flex-col space-y-4 sm:space-y-6">
         <NavLink 
           to="/" 

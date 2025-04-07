@@ -46,7 +46,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         <Logo isScrolled={isScrolled} />
 
-        {/* Desktop Menu */}
+        {/* Desktop Menu - updated breakpoint to ensure clear transition */}
         <DesktopMenu isScrolled={isScrolled} />
 
         {/* Mobile Menu Button */}
