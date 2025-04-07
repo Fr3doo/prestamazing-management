@@ -45,6 +45,27 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Custom navbar height variables */
+    --navbar-height: 64px;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --navbar-height: 72px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --navbar-height: 80px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --navbar-height: 88px;
+    }
   }
 
   .dark {
