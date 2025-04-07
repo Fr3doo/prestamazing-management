@@ -1,6 +1,6 @@
 
 import { useLocation } from 'react-router-dom';
-import { Phone } from 'lucide-react';
+import { Phone, X } from 'lucide-react';
 import NavLink from './NavLink';
 
 interface MobileMenuProps {
@@ -20,6 +20,15 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
   return (
     <div className="fixed inset-0 h-screen bg-white z-40 pt-16 p-6 md:hidden animate-fade-in overflow-y-auto">
+      {/* Close button */}
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 text-primary hover:bg-gray-100 rounded-full transition-colors"
+        aria-label="Fermer le menu"
+      >
+        <X size={24} />
+      </button>
+      
       <div className="flex flex-col space-y-4 sm:space-y-6">
         <NavLink 
           to="/" 
