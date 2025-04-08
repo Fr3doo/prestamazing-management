@@ -32,8 +32,8 @@ const BioSection = () => {
         <div ref={imageRef} className="reveal">
           <div className="rounded-xl overflow-hidden shadow-elegant">
             <img 
-              src="https://images.unsplash.com/photo-1571805529673-cf2d698fb5fc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" 
-              alt="Steve PRESTA" 
+              src="/lovable-uploads/1189be5f-dc49-4491-8f61-aed83964f50c.png" 
+              alt="Steve PREST'A" 
               className="w-full h-full object-cover"
             />
           </div>
