@@ -1,0 +1,61 @@
+
+/* Custom animations */
+.reveal {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(50px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, visibility 0.6s;
+}
+
+.reveal.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Ensure elements are visible even if JS fails */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+/* Make sure service details are visible by default on smaller screens */
+@media (max-width: 768px) {
+  .section .reveal {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+}
+
+/* Staggered reveal for children */
+.stagger-children > *:nth-child(1) { transition-delay: 0ms; }
+.stagger-children > *:nth-child(2) { transition-delay: 100ms; }
+.stagger-children > *:nth-child(3) { transition-delay: 200ms; }
+.stagger-children > *:nth-child(4) { transition-delay: 300ms; }
+.stagger-children > *:nth-child(5) { transition-delay: 400ms; }
+
+/* Goldish highlight */
+.highlight {
+  position: relative;
+  display: inline-block;
+}
+
+.highlight::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 30%;
+  width: 100%;
+  background-color: rgba(196, 167, 125, 0.3);
+  z-index: -1;
+  transition: height 0.3s ease;
+}
+
+.highlight:hover::after {
+  height: 50%;
+}
