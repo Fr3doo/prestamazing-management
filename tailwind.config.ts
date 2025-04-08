@@ -18,6 +18,13 @@ export default {
 				'2xl': '1400px'
 			}
 		},
+		screens: {
+			'sm': '640px',
+			'md': '859px', // Changed from default 768px to 859px
+			'lg': '1024px',
+			'xl': '1280px',
+			'2xl': '1536px',
+		},
 		extend: {
 			colors: {
 				border: 'hsl(var(--border))',
