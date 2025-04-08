@@ -55,7 +55,7 @@
     }
   }
 
-  @media (min-width: 859px) {
+  @media (min-width: 890px) {
     :root {
       --navbar-height: 80px;
     }

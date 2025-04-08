@@ -19,8 +19,9 @@ export default {
 			}
 		},
 		screens: {
+			'xs': '480px',
 			'sm': '640px',
-			'md': '859px', // Changed from default 768px to 859px
+			'md': '890px', // Changed from 859px to 890px
 			'lg': '1024px',
 			'xl': '1280px',
 			'2xl': '1536px',
