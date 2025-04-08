@@ -11,7 +11,7 @@ const About = () => {
   return (
     <div>
       <Hero 
-        title="À propos de Steve PRESTA"
+        title="À propos de Steve PREST'A"
         subtitle="Expert en management de la restauration, passionné par l'excellence du service et l'optimisation de l'expérience client."
         ctaText="Contactez-moi"
         ctaLink="/contact"
