@@ -20,40 +20,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+      
+      console.log('Admin check result:', { data, error, userId });
+      return !!data && !error;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Check if user is admin
-          setTimeout(async () => {
-            const { data } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', session.user.id)
-              .eq('role', 'admin')
-              .single();
-            
-            setIsAdmin(!!data);
-            setLoading(false);
-          }, 0);
+          const adminStatus = await checkAdminStatus(session.user.id);
+          console.log('Admin status for user:', session.user.id, adminStatus);
+          setIsAdmin(adminStatus);
         } else {
           setIsAdmin(false);
-          setLoading(false);
         }
+        setLoading(false);
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
-      if (!session) {
-        setLoading(false);
+      
+      if (session?.user) {
+        const adminStatus = await checkAdminStatus(session.user.id);
+        console.log('Initial admin status:', session.user.id, adminStatus);
+        setIsAdmin(adminStatus);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

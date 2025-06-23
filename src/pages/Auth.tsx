@@ -11,26 +11,31 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, isAdmin } = useAuth();
+  const [hasTriedAuth, setHasTriedAuth] = useState(false);
+  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user && isAdmin) {
-      navigate('/admin');
-    } else if (user && !isAdmin) {
-      navigate('/');
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits d'administration.",
-        variant: "destructive",
-      });
+    // Attendre que l'authentification soit complètement chargée
+    if (!authLoading && user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else if (hasTriedAuth) {
+        // N'afficher l'erreur que si l'utilisateur a essayé de se connecter
+        toast({
+          title: "Accès refusé",
+          description: "Vous n'avez pas les droits d'administration.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [user, isAdmin, navigate, toast]);
+  }, [user, isAdmin, authLoading, navigate, toast, hasTriedAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setHasTriedAuth(true);
 
     const { error } = await signIn(email, password);
 
@@ -44,6 +49,15 @@ const Auth = () => {
 
     setLoading(false);
   };
+
+  // Afficher un indicateur de chargement pendant la vérification d'auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-lg">Vérification des droits d'accès...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
