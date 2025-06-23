@@ -11,35 +11,37 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [hasTriedAuth, setHasTriedAuth] = useState(false);
   const { signIn, user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Attendre que l'authentification soit complètement chargée
+    // Seulement rediriger si l'authentification est complètement chargée
     if (!authLoading && user) {
       if (isAdmin) {
+        console.log('Redirecting to admin dashboard');
         navigate('/admin');
-      } else if (hasTriedAuth) {
-        // N'afficher l'erreur que si l'utilisateur a essayé de se connecter
+      } else {
+        console.log('User is not admin, showing error');
         toast({
           title: "Accès refusé",
           description: "Vous n'avez pas les droits d'administration.",
           variant: "destructive",
         });
+        // Ne pas rediriger, laisser l'utilisateur sur la page de connexion
       }
     }
-  }, [user, isAdmin, authLoading, navigate, toast, hasTriedAuth]);
+  }, [user, isAdmin, authLoading, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setHasTriedAuth(true);
 
+    console.log('Attempting to sign in with:', email);
     const { error } = await signIn(email, password);
 
     if (error) {
+      console.error('Sign in error:', error);
       toast({
         title: "Erreur de connexion",
         description: error.message,
@@ -50,7 +52,7 @@ const Auth = () => {
     setLoading(false);
   };
 
-  // Afficher un indicateur de chargement pendant la vérification d'auth
+  // Afficher un indicateur de chargement pendant la vérification d'auth initiale
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
