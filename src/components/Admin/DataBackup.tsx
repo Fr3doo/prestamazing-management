@@ -46,26 +46,40 @@ const DataBackup = () => {
     setBackupProgress(0);
     
     try {
-      // Simulation du processus de sauvegarde avec progression
-      const tables = ['reviews', 'contact_info', 'content_sections', 'partners_logos'];
+      // Fetch data from each table with proper type safety
       const data: any = {};
       
-      for (let i = 0; i < tables.length; i++) {
-        const table = tables[i];
-        setBackupProgress((i / tables.length) * 100);
-        
-        const { data: tableData, error } = await supabase
-          .from(table)
-          .select('*');
-          
-        if (error) throw error;
-        data[table] = tableData;
-        
-        // Simulation d'un délai pour montrer la progression
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+      // Reviews
+      setBackupProgress(25);
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('*');
+      if (reviewsError) throw reviewsError;
+      data.reviews = reviewsData;
       
+      // Contact info
+      setBackupProgress(50);
+      const { data: contactData, error: contactError } = await supabase
+        .from('contact_info')
+        .select('*');
+      if (contactError) throw contactError;
+      data.contact_info = contactData;
+      
+      // Content sections
+      setBackupProgress(75);
+      const { data: contentData, error: contentError } = await supabase
+        .from('content_sections')
+        .select('*');
+      if (contentError) throw contentError;
+      data.content_sections = contentData;
+      
+      // Partners logos
       setBackupProgress(100);
+      const { data: partnersData, error: partnersError } = await supabase
+        .from('partners_logos')
+        .select('*');
+      if (partnersError) throw partnersError;
+      data.partners_logos = partnersData;
       
       // Création du fichier de sauvegarde
       const backupData = {
@@ -151,15 +165,45 @@ const DataBackup = () => {
     reader.readAsText(file);
   };
 
-  const exportTable = async (tableName: string) => {
+  const exportTable = async (tableName: 'reviews' | 'contact_info' | 'content_sections' | 'partners_logos') => {
     try {
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*');
-        
-      if (error) throw error;
+      let data: any[] = [];
       
-      const csvContent = convertToCSV(data || []);
+      switch (tableName) {
+        case 'reviews':
+          const { data: reviewsData, error: reviewsError } = await supabase
+            .from('reviews')
+            .select('*');
+          if (reviewsError) throw reviewsError;
+          data = reviewsData || [];
+          break;
+          
+        case 'contact_info':
+          const { data: contactData, error: contactError } = await supabase
+            .from('contact_info')
+            .select('*');
+          if (contactError) throw contactError;
+          data = contactData || [];
+          break;
+          
+        case 'content_sections':
+          const { data: contentData, error: contentError } = await supabase
+            .from('content_sections')
+            .select('*');
+          if (contentError) throw contentError;
+          data = contentData || [];
+          break;
+          
+        case 'partners_logos':
+          const { data: partnersData, error: partnersError } = await supabase
+            .from('partners_logos')
+            .select('*');
+          if (partnersError) throw partnersError;
+          data = partnersData || [];
+          break;
+      }
+      
+      const csvContent = convertToCSV(data);
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       
@@ -277,10 +321,10 @@ const DataBackup = () => {
           <CardContent>
             <div className="space-y-3">
               {[
-                { name: 'reviews', label: 'Avis clients' },
-                { name: 'contact_info', label: 'Informations de contact' },
-                { name: 'content_sections', label: 'Sections de contenu' },
-                { name: 'partners_logos', label: 'Logos partenaires' }
+                { name: 'reviews' as const, label: 'Avis clients' },
+                { name: 'contact_info' as const, label: 'Informations de contact' },
+                { name: 'content_sections' as const, label: 'Sections de contenu' },
+                { name: 'partners_logos' as const, label: 'Logos partenaires' }
               ].map((table) => (
                 <div key={table.name} className="flex justify-between items-center p-3 border rounded-lg">
                   <span className="font-medium">{table.label}</span>
