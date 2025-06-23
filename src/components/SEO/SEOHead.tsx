@@ -24,6 +24,9 @@ const SEOHead = ({
       <meta name="robots" content="index, follow" />
       <meta name="author" content="Prestamazing Management" />
       
+      {/* Google Search Console Verification */}
+      <meta name="google-site-verification" content="gQviMLWDXnVsKvNaR7CJVqfdbvU7ikcr_S8t" />
+      
       {/* Open Graph */}
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
