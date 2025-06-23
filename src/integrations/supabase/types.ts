@@ -66,6 +66,30 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          otp_email_expiry: number
+          otp_sms_expiry: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          otp_email_expiry: number
+          otp_sms_expiry: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          otp_email_expiry?: number
+          otp_sms_expiry?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       partners_logos: {
         Row: {
           created_at: string | null
@@ -93,6 +117,30 @@ export type Database = {
           partner_name?: string
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          updated_at?: string | null
+          username?: string
         }
         Relationships: []
       }
@@ -149,9 +197,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_existence: {
+        Args: { _email: string }
+        Returns: boolean
+      }
+      get_user_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          id: string
+          username: string
+          email: string
+        }[]
+      }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: {
+          role: string
+        }[]
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      update_user_profile: {
+        Args: { _user_id: string; _username: string; _email: string }
+        Returns: undefined
       }
     }
     Enums: {
