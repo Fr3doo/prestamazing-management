@@ -16,6 +16,7 @@ import AdminReviews from "./pages/AdminReviews";
 import AdminPartners from "./pages/AdminPartners";
 import AdminContent from "./pages/AdminContent";
 import AdminContacts from "./pages/AdminContacts";
+import AdminAdvanced from "./pages/AdminAdvanced";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/admin/partners" element={<AdminPartners />} />
               <Route path="/admin/content" element={<AdminContent />} />
               <Route path="/admin/contacts" element={<AdminContacts />} />
+              <Route path="/admin/advanced" element={<AdminAdvanced />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

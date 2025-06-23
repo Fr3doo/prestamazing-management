@@ -3,7 +3,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,6 +18,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: '/admin/partners', label: 'Partenaires' },
     { path: '/admin/content', label: 'Contenu' },
     { path: '/admin/contacts', label: 'Contacts' },
+    { path: '/admin/advanced', label: 'Avancé' },
   ];
 
   const isActiveRoute = (path: string, exact = false) => {
