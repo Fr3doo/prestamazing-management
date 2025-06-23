@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import AdminReviews from "./pages/AdminReviews";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/about" element={<Layout><About /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/admin/*" element={<Admin />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/reviews" element={<AdminReviews />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
