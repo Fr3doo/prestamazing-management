@@ -26,6 +26,7 @@ const SEOHead = ({
       
       {/* Google Search Console Verification */}
       <meta name="google-site-verification" content="gQviMLWDXnVsKvNaR7CJVqfdbuVl7ikcr_S8b5VOyaY" />
+      <meta name="google-site-verification" content="elKmHp6Nawwqgv334SbLVLMFs9562-Mwg11XlfbNt9I" />
       
       {/* Open Graph */}
       <meta property="og:type" content="website" />
