@@ -13,13 +13,9 @@ import ContentForm from './ContentForm';
 interface ContentSection {
   id: string;
   section_key: string;
-  section_name: string;
-  content_type: string;
-  content_value: string | null;
-  page_name: string;
-  description: string | null;
-  is_active: boolean;
-  display_order: number;
+  title: string | null;
+  content: string | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,7 +26,6 @@ const ContentManagement = () => {
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPage, setSelectedPage] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,8 +37,7 @@ const ContentManagement = () => {
       const { data, error } = await supabase
         .from('content_sections')
         .select('*')
-        .order('page_name', { ascending: true })
-        .order('display_order', { ascending: true });
+        .order('section_key', { ascending: true });
 
       if (error) throw error;
       setSections(data || []);
@@ -59,36 +53,6 @@ const ContentManagement = () => {
     }
   };
 
-  const toggleActiveStatus = async (section: ContentSection) => {
-    try {
-      const { error } = await supabase
-        .from('content_sections')
-        .update({ 
-          is_active: !section.is_active,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', section.id);
-
-      if (error) throw error;
-
-      setSections(sections.map(s => 
-        s.id === section.id ? { ...s, is_active: !s.is_active } : s
-      ));
-
-      toast({
-        title: "Succès",
-        description: `Section ${!section.is_active ? 'activée' : 'désactivée'} avec succès`,
-      });
-    } catch (error) {
-      console.error('Erreur lors du changement de statut:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de modifier le statut de la section",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleFormSuccess = () => {
     setEditingSection(null);
     setShowForm(false);
@@ -100,26 +64,10 @@ const ContentManagement = () => {
     setShowForm(false);
   };
 
-  const filteredSections = sections.filter(section => {
-    const matchesSearch = section.section_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         section.section_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (section.description && section.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesPage = !selectedPage || section.page_name === selectedPage;
-    return matchesSearch && matchesPage;
-  });
-
-  const uniquePages = [...new Set(sections.map(s => s.page_name))].sort();
-
-  const getContentTypeColor = (type: string) => {
-    switch (type) {
-      case 'text': return 'bg-blue-100 text-blue-800';
-      case 'textarea': return 'bg-green-100 text-green-800';
-      case 'rich_text': return 'bg-purple-100 text-purple-800';
-      case 'image': return 'bg-orange-100 text-orange-800';
-      case 'url': return 'bg-cyan-100 text-cyan-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const filteredSections = sections.filter(section => 
+    section.section_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (section.title && section.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const truncateText = (text: string | null, maxLength: number = 100) => {
     if (!text) return '-';
@@ -177,65 +125,23 @@ const ContentManagement = () => {
               />
             </div>
           </div>
-          <Select value={selectedPage} onValueChange={setSelectedPage}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrer par page" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Toutes les pages</SelectItem>
-              {uniquePages.map(page => (
-                <SelectItem key={page} value={page}>
-                  {page.charAt(0).toUpperCase() + page.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
       <div className="grid gap-4">
         {filteredSections.map((section) => (
-          <Card key={section.id} className={`${!section.is_active ? 'opacity-60' : ''}`}>
+          <Card key={section.id}>
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{section.section_name}</CardTitle>
-                    <Badge variant="outline" className={getContentTypeColor(section.content_type)}>
-                      {section.content_type}
-                    </Badge>
+                    <CardTitle className="text-lg">{section.title || section.section_key}</CardTitle>
                     <Badge variant="outline">
-                      {section.page_name}
+                      {section.section_key}
                     </Badge>
-                    {!section.is_active && (
-                      <Badge variant="destructive">Désactivé</Badge>
-                    )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    <span className="font-medium">Clé:</span> {section.section_key}
-                  </p>
-                  {section.description && (
-                    <p className="text-sm text-gray-500">{section.description}</p>
-                  )}
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleActiveStatus(section)}
-                  >
-                    {section.is_active ? (
-                      <>
-                        <EyeOff className="h-4 w-4 mr-1" />
-                        Désactiver
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-1" />
-                        Activer
-                      </>
-                    )}
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -254,8 +160,14 @@ const ContentManagement = () => {
               <div className="bg-gray-50 p-3 rounded-md">
                 <p className="text-sm font-medium text-gray-700 mb-1">Contenu actuel:</p>
                 <p className="text-sm text-gray-600">
-                  {truncateText(section.content_value)}
+                  {truncateText(section.content)}
                 </p>
+                {section.image_url && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-700 mb-1">Image:</p>
+                    <p className="text-sm text-gray-600">{section.image_url}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
