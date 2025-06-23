@@ -6,6 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { contentSectionSchema, sanitizeText } from '@/utils/inputValidation';
+import { securityMonitor } from '@/utils/securityMonitoring';
+import { z } from 'zod';
 
 interface ContentSection {
   id: string;
@@ -31,6 +34,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
     image_url: '',
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,6 +47,29 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
       });
     }
   }, [section]);
+
+  const validateField = (field: string, value: string) => {
+    try {
+      const fieldSchema = contentSectionSchema.pick({ [field]: true } as any);
+      fieldSchema.parse({ [field]: value });
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors(prev => ({ ...prev, [field]: error.errors[0]?.message || 'Erreur de validation' }));
+      }
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    const sanitizedValue = sanitizeText(value);
+    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+    
+    if (value.trim()) {
+      validateField(field, sanitizedValue);
+    } else {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,39 +84,52 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
     }
 
     setLoading(true);
+    setErrors({});
 
     try {
+      // Validate all fields
+      const validatedData = contentSectionSchema.parse(formData);
+      
+      // Additional sanitization
+      const sanitizedData = {
+        section_key: sanitizeText(validatedData.section_key),
+        title: validatedData.title ? sanitizeText(validatedData.title) : null,
+        content: validatedData.content ? sanitizeText(validatedData.content) : null,
+        image_url: validatedData.image_url || null,
+      };
+
       if (section) {
-        // Mise à jour
+        // Update
         const { error } = await supabase
           .from('content_sections')
           .update({
-            section_key: formData.section_key.trim(),
-            title: formData.title.trim() || null,
-            content: formData.content.trim() || null,
-            image_url: formData.image_url.trim() || null,
+            ...sanitizedData,
             updated_at: new Date().toISOString(),
           })
           .eq('id', section.id);
 
         if (error) throw error;
 
+        await securityMonitor.logAdminAction('UPDATE', 'content_section', {
+          section_id: section.id,
+          section_key: sanitizedData.section_key
+        });
+
         toast({
           title: "Succès",
           description: "Section mise à jour avec succès",
         });
       } else {
-        // Création
+        // Create
         const { error } = await supabase
           .from('content_sections')
-          .insert({
-            section_key: formData.section_key.trim(),
-            title: formData.title.trim() || null,
-            content: formData.content.trim() || null,
-            image_url: formData.image_url.trim() || null,
-          });
+          .insert([sanitizedData]);
 
         if (error) throw error;
+
+        await securityMonitor.logAdminAction('CREATE', 'content_section', {
+          section_key: sanitizedData.section_key
+        });
 
         toast({
           title: "Succès",
@@ -100,28 +140,58 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
       onSuccess();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder la section",
-        variant: "destructive",
-      });
+      
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach(err => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(newErrors);
+        
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez corriger les erreurs dans le formulaire.",
+          variant: "destructive",
+        });
+      } else {
+        await securityMonitor.logSuspiciousActivity('content_form_error', {
+          section_key: formData.section_key,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        
+        toast({
+          title: "Erreur",
+          description: "Impossible de sauvegarder la section",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6" noValidate>
       <div>
         <Label htmlFor="section_key">Clé de section *</Label>
         <Input
           id="section_key"
           value={formData.section_key}
-          onChange={(e) => setFormData({ ...formData, section_key: e.target.value })}
+          onChange={(e) => handleInputChange('section_key', e.target.value)}
           required
           placeholder="ex: hero_title"
-          disabled={!!section} // Désactiver la modification de la clé pour les sections existantes
+          disabled={!!section}
+          maxLength={50}
+          className={errors.section_key ? 'border-red-500' : ''}
+          aria-describedby={errors.section_key ? 'section_key-error' : undefined}
         />
+        {errors.section_key && (
+          <p id="section_key-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.section_key}
+          </p>
+        )}
         <p className="text-xs text-gray-500 mt-1">
           Identifiant unique technique (ne pas modifier pour les sections existantes)
         </p>
@@ -132,9 +202,17 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
         <Input
           id="title"
           value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          onChange={(e) => handleInputChange('title', e.target.value)}
           placeholder="Titre de la section"
+          maxLength={200}
+          className={errors.title ? 'border-red-500' : ''}
+          aria-describedby={errors.title ? 'title-error' : undefined}
         />
+        {errors.title && (
+          <p id="title-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.title}
+          </p>
+        )}
       </div>
 
       <div>
@@ -142,10 +220,21 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
         <Textarea
           id="content"
           value={formData.content}
-          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          onChange={(e) => handleInputChange('content', e.target.value)}
           placeholder="Contenu de la section"
           rows={6}
+          maxLength={5000}
+          className={errors.content ? 'border-red-500' : ''}
+          aria-describedby={errors.content ? 'content-error' : undefined}
         />
+        {errors.content && (
+          <p id="content-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.content}
+          </p>
+        )}
+        <p className="text-sm text-gray-500 mt-1">
+          {formData.content.length}/5000 caractères
+        </p>
       </div>
 
       <div>
@@ -153,10 +242,18 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
         <Input
           id="image_url"
           value={formData.image_url}
-          onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+          onChange={(e) => handleInputChange('image_url', e.target.value)}
           placeholder="https://example.com/image.jpg"
           type="url"
+          maxLength={500}
+          className={errors.image_url ? 'border-red-500' : ''}
+          aria-describedby={errors.image_url ? 'image_url-error' : undefined}
         />
+        {errors.image_url && (
+          <p id="image_url-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.image_url}
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">

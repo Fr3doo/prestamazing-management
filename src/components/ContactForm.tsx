@@ -1,154 +1,247 @@
 
-import { useState } from 'react';
-import { Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  contactFormSchema, 
+  sanitizeText, 
+  sanitizeEmail, 
+  contactFormRateLimit 
+} from '@/utils/inputValidation';
+import { z } from 'zod';
 
 const ContactForm = () => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
-    establishment: '',
     email: '',
     phone: '',
-    message: '',
+    subject: '',
+    message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const validateField = (field: string, value: string) => {
+    try {
+      const fieldSchema = contactFormSchema.pick({ [field]: true } as any);
+      fieldSchema.parse({ [field]: value });
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors(prev => ({ ...prev, [field]: error.errors[0]?.message || 'Erreur de validation' }));
+      }
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const handleInputChange = (field: string, value: string) => {
+    const sanitizedValue = field === 'email' ? sanitizeEmail(value) : sanitizeText(value);
+    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
     
-    // Simulate form submission
-    setTimeout(() => {
+    // Real-time validation
+    if (value.trim()) {
+      validateField(field, sanitizedValue);
+    } else {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Rate limiting check
+    const clientIP = 'user-session'; // In production, you'd get the actual IP
+    if (!contactFormRateLimit.isAllowed(clientIP)) {
+      const remainingTime = Math.ceil(contactFormRateLimit.getRemainingTime(clientIP) / 1000 / 60);
       toast({
-        title: "Message envoyé",
-        description: "Nous vous répondrons dans les plus brefs délais.",
-        duration: 5000,
+        title: "Trop de tentatives",
+        description: `Veuillez attendre ${remainingTime} minutes avant de soumettre un nouveau message.`,
+        variant: "destructive",
       });
-      setIsSubmitting(false);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      // Validate all fields
+      const validatedData = contactFormSchema.parse(formData);
+      
+      // Additional sanitization before submission
+      const sanitizedData = {
+        name: sanitizeText(validatedData.name),
+        email: sanitizeEmail(validatedData.email),
+        phone: validatedData.phone ? sanitizeText(validatedData.phone) : null,
+        subject: sanitizeText(validatedData.subject),
+        message: sanitizeText(validatedData.message)
+      };
+
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert([{
+          ...sanitizedData,
+          submitted_at: new Date().toISOString(),
+          ip_address: 'hidden', // In production, log IP for security
+          user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message envoyé !",
+        description: "Nous vous répondrons dans les plus brefs délais.",
+      });
+
+      // Reset form
       setFormData({
         name: '',
-        establishment: '',
         email: '',
         phone: '',
-        message: '',
+        subject: '',
+        message: ''
       });
-    }, 1500);
+
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error);
+      
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach(err => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(newErrors);
+        
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez corriger les erreurs dans le formulaire.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible d'envoyer le message. Veuillez réessayer.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-8 md:p-10 shadow-elegant">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Nom complet*
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-secondary/50 focus:border-secondary outline-none transition-all"
-            placeholder="Votre nom"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="establishment" className="block text-sm font-medium text-gray-700 mb-2">
-            Établissement*
-          </label>
-          <input
-            id="establishment"
-            name="establishment"
-            type="text"
-            required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-secondary/50 focus:border-secondary outline-none transition-all"
-            placeholder="Nom de votre établissement"
-            value={formData.establishment}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Email*
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-secondary/50 focus:border-secondary outline-none transition-all"
-            placeholder="votre@email.com"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-            Téléphone*
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-secondary/50 focus:border-secondary outline-none transition-all"
-            placeholder="Votre numéro de téléphone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-        </div>
-      </div>
-      
-      <div className="mb-6">
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-          Message*
-        </label>
-        <textarea
-          id="message"
-          name="message"
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      <div>
+        <Input
+          type="text"
+          placeholder="Votre nom *"
+          value={formData.name}
+          onChange={(e) => handleInputChange('name', e.target.value)}
           required
-          rows={5}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-secondary/50 focus:border-secondary outline-none transition-all"
-          placeholder="Comment puis-je vous aider ?"
-          value={formData.message}
-          onChange={handleChange}
-        ></textarea>
-      </div>
-      
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full bg-primary text-white font-montserrat font-semibold py-4 px-6 rounded-lg flex items-center justify-center transition-all duration-300 ${
-          isSubmitting 
-            ? 'opacity-80 cursor-not-allowed' 
-            : 'hover:bg-primary/90 hover:shadow-lg hover:translate-y-[-2px]'
-        }`}
-      >
-        {isSubmitting ? (
-          <span className="flex items-center">
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Envoi en cours...
-          </span>
-        ) : (
-          <span className="flex items-center">
-            Envoyer le message
-            <Send size={18} className="ml-2" />
-          </span>
+          maxLength={100}
+          className={errors.name ? 'border-red-500' : ''}
+          aria-describedby={errors.name ? 'name-error' : undefined}
+        />
+        {errors.name && (
+          <p id="name-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.name}
+          </p>
         )}
-      </button>
+      </div>
+
+      <div>
+        <Input
+          type="email"
+          placeholder="Votre email *"
+          value={formData.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
+          required
+          maxLength={254}
+          className={errors.email ? 'border-red-500' : ''}
+          aria-describedby={errors.email ? 'email-error' : undefined}
+        />
+        {errors.email && (
+          <p id="email-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.email}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Input
+          type="tel"
+          placeholder="Votre téléphone (optionnel)"
+          value={formData.phone}
+          onChange={(e) => handleInputChange('phone', e.target.value)}
+          maxLength={20}
+          className={errors.phone ? 'border-red-500' : ''}
+          aria-describedby={errors.phone ? 'phone-error' : undefined}
+        />
+        {errors.phone && (
+          <p id="phone-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.phone}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Input
+          type="text"
+          placeholder="Sujet *"
+          value={formData.subject}
+          onChange={(e) => handleInputChange('subject', e.target.value)}
+          required
+          maxLength={200}
+          className={errors.subject ? 'border-red-500' : ''}
+          aria-describedby={errors.subject ? 'subject-error' : undefined}
+        />
+        {errors.subject && (
+          <p id="subject-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.subject}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Textarea
+          placeholder="Votre message *"
+          value={formData.message}
+          onChange={(e) => handleInputChange('message', e.target.value)}
+          required
+          rows={6}
+          maxLength={2000}
+          className={errors.message ? 'border-red-500' : ''}
+          aria-describedby={errors.message ? 'message-error' : undefined}
+        />
+        {errors.message && (
+          <p id="message-error" className="text-red-500 text-sm mt-1" role="alert">
+            {errors.message}
+          </p>
+        )}
+        <p className="text-sm text-gray-500 mt-1">
+          {formData.message.length}/2000 caractères
+        </p>
+      </div>
+
+      <Button 
+        type="submit" 
+        className="w-full" 
+        disabled={loading}
+        aria-describedby={loading ? 'loading-message' : undefined}
+      >
+        {loading ? 'Envoi en cours...' : 'Envoyer le message'}
+      </Button>
+      
+      {loading && (
+        <p id="loading-message" className="sr-only">
+          Envoi du message en cours, veuillez patienter.
+        </p>
+      )}
     </form>
   );
 };
