@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import AdminReviews from "./pages/AdminReviews";
 import AdminPartners from "./pages/AdminPartners";
+import AdminContent from "./pages/AdminContent";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/reviews" element={<AdminReviews />} />
               <Route path="/admin/partners" element={<AdminPartners />} />
+              <Route path="/admin/content" element={<AdminContent />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
