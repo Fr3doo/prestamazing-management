@@ -11,6 +11,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showNonAdminError, setShowNonAdminError] = useState(false);
   const { signIn, signOut, user, isAdmin, initialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,6 +19,7 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setShowNonAdminError(false);
 
     console.log('Attempting to sign in with:', email);
     const { error } = await signIn(email, password);
@@ -30,10 +32,8 @@ const Auth = () => {
         variant: "destructive",
       });
       setLoading(false);
-    } else {
-      // Don't set loading to false here, let the useEffect handle navigation
-      console.log('Sign in successful, waiting for auth state update');
     }
+    // Ne pas mettre loading à false ici, laisser le useEffect gérer ça après vérification admin
   };
 
   const handleSignOut = async () => {
@@ -41,6 +41,7 @@ const Auth = () => {
     await signOut();
     setEmail('');
     setPassword('');
+    setShowNonAdminError(false);
   };
 
   // Handle navigation after successful login
@@ -49,18 +50,26 @@ const Auth = () => {
       console.log('User is admin, redirecting to admin dashboard');
       navigate('/admin', { replace: true });
     } else if (initialized && user && !isAdmin) {
-      console.log('User is not admin, showing error');
+      console.log('User is not admin, stopping loading and showing error state');
+      setLoading(false);
+      setShowNonAdminError(true);
+    } else if (initialized && !user) {
+      // User is not logged in, stop loading
+      setLoading(false);
+      setShowNonAdminError(false);
+    }
+  }, [user, isAdmin, initialized, navigate]);
+
+  // Show non-admin error only after we've determined the user is not admin
+  useEffect(() => {
+    if (showNonAdminError && user && !isAdmin) {
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'administration. Vous pouvez vous déconnecter et essayer avec un autre compte.",
         variant: "destructive",
       });
-      setLoading(false);
-    } else if (initialized && !user) {
-      // User is not logged in, stop loading
-      setLoading(false);
     }
-  }, [user, isAdmin, initialized, navigate, toast]);
+  }, [showNonAdminError, user, isAdmin, toast]);
 
   // If user is already logged in but not admin, show disconnect option
   if (initialized && user && !isAdmin) {
