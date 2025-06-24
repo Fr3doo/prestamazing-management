@@ -11,29 +11,9 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, isAdmin, loading: authLoading, initialized } = useAuth();
+  const { signIn, user, isAdmin, initialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Only process redirect logic if auth is fully initialized and we have a user
-    if (initialized && user) {
-      console.log('Auth initialized, user:', user.id, 'isAdmin:', isAdmin);
-      
-      if (isAdmin) {
-        console.log('User is admin, redirecting to admin dashboard');
-        navigate('/admin', { replace: true });
-      } else {
-        console.log('User is not admin, showing error');
-        toast({
-          title: "Accès refusé",
-          description: "Vous n'avez pas les droits d'administration.",
-          variant: "destructive",
-        });
-        // Don't redirect non-admin users, let them stay on auth page
-      }
-    }
-  }, [user, isAdmin, initialized, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,19 +29,31 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      setLoading(false);
+    } else {
+      // Don't set loading to false here, let the useEffect handle navigation
+      console.log('Sign in successful, waiting for auth state update');
     }
-
-    setLoading(false);
   };
 
-  // Show loading state only while auth is initializing
-  if (!initialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg">Vérification des droits d'accès...</div>
-      </div>
-    );
-  }
+  // Handle navigation after successful login
+  useEffect(() => {
+    if (initialized && user && isAdmin) {
+      console.log('User is admin, redirecting to admin dashboard');
+      navigate('/admin', { replace: true });
+    } else if (initialized && user && !isAdmin) {
+      console.log('User is not admin, showing error');
+      toast({
+        title: "Accès refusé",
+        description: "Vous n'avez pas les droits d'administration.",
+        variant: "destructive",
+      });
+      setLoading(false);
+    } else if (initialized && !user) {
+      // User is not logged in, stop loading
+      setLoading(false);
+    }
+  }, [user, isAdmin, initialized, navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
