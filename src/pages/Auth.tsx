@@ -16,30 +16,20 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Timeout pour éviter les boucles infinies de chargement
-    const timeout = setTimeout(() => {
-      if (authLoading) {
-        console.warn('Auth loading timeout - forcing completion');
-      }
-    }, 10000); // 10 secondes
-
-    // Seulement rediriger si l'authentification est complètement chargée
-    if (!authLoading && user) {
-      if (isAdmin) {
-        console.log('Redirecting to admin dashboard');
-        navigate('/admin');
-      } else {
-        console.log('User is not admin, showing error');
-        toast({
-          title: "Accès refusé",
-          description: "Vous n'avez pas les droits d'administration.",
-          variant: "destructive",
-        });
-        // Ne pas rediriger, laisser l'utilisateur sur la page de connexion
-      }
+    // Si l'utilisateur est connecté et admin, rediriger vers l'admin
+    if (user && isAdmin && !authLoading) {
+      console.log('Redirecting to admin dashboard');
+      navigate('/admin');
     }
-
-    return () => clearTimeout(timeout);
+    // Si l'utilisateur est connecté mais pas admin, afficher un message d'erreur
+    else if (user && !isAdmin && !authLoading) {
+      console.log('User is not admin, showing error');
+      toast({
+        title: "Accès refusé",
+        description: "Vous n'avez pas les droits d'administration.",
+        variant: "destructive",
+      });
+    }
   }, [user, isAdmin, authLoading, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,8 +51,7 @@ const Auth = () => {
     setLoading(false);
   };
 
-  // Afficher un indicateur de chargement pendant la vérification d'auth initiale
-  // Mais avec un timeout pour éviter les blocages
+  // Afficher un indicateur de chargement seulement pendant un court moment
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -70,16 +59,7 @@ const Auth = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-lg mb-4">Vérification des droits d'accès...</div>
-              <div className="text-sm text-gray-600">
-                Si cette page reste affichée, veuillez rafraîchir la page.
-              </div>
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline" 
-                className="mt-4"
-              >
-                Rafraîchir la page
-              </Button>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             </div>
           </CardContent>
         </Card>

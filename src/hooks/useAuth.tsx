@@ -20,8 +20,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (userId: string): Promise<boolean> => {
     try {
       console.log('Checking admin status for user:', userId);
       const { data, error } = await supabase
@@ -29,21 +30,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
-        .single();
+        .maybeSingle();
       
       console.log('Admin check result:', { data, error, userId });
       
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 is "not found" error, which is expected for non-admin users
+      if (error) {
         console.error('Error checking admin status:', error);
-        await securityMonitor.logSuspiciousActivity('admin_check_failed', {
-          user_id: userId,
-          error: error.message
-        });
         return false;
       }
       
-      return !!data && !error;
+      return !!data;
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
@@ -51,102 +47,128 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    const initAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          if (isMounted) {
+            setLoading(false);
+            setInitialized(true);
+          }
+          return;
+        }
+
+        console.log('Initial session:', initialSession?.user?.id);
+        
+        if (isMounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+          
+          if (initialSession?.user) {
+            try {
+              const adminStatus = await checkAdminStatus(initialSession.user.id);
+              console.log('Initial admin status:', initialSession.user.id, adminStatus);
+              if (isMounted) {
+                setIsAdmin(adminStatus);
+              }
+            } catch (error) {
+              console.error('Error during initial admin check:', error);
+              if (isMounted) {
+                setIsAdmin(false);
+              }
+            }
+          } else {
+            setIsAdmin(false);
+          }
+          
+          setLoading(false);
+          setInitialized(true);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (isMounted) {
+          setLoading(false);
+          setInitialized(true);
+        }
+      }
+    };
+
+    // Set up timeout to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      if (isMounted && !initialized) {
+        console.warn('Auth initialization timeout - forcing completion');
+        setLoading(false);
+        setInitialized(true);
+      }
+    }, 5000);
+
+    initAuth();
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+      async (event, newSession) => {
+        console.log('Auth state change:', event, newSession?.user?.id);
         
-        if (!mounted) return;
+        if (!isMounted) return;
         
-        setSession(session);
-        setUser(session?.user ?? null);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         
-        // Log authentication events
-        if (event === 'SIGNED_IN' && session?.user) {
-          await securityMonitor.logLoginAttempt(true, session.user.email);
-        } else if (event === 'SIGNED_OUT') {
-          await securityMonitor.logEvent({
-            event_type: 'login_success', // Using for logout too
-            details: { action: 'logout' },
-            severity: 'low'
-          });
-        }
-        
-        // Check admin status
-        if (session?.user) {
+        // Handle auth events
+        if (event === 'SIGNED_IN' && newSession?.user) {
           try {
-            const adminStatus = await checkAdminStatus(session.user.id);
-            console.log('Admin status for user:', session.user.id, adminStatus);
-            if (mounted) {
+            await securityMonitor.logLoginAttempt(true, newSession.user.email);
+            
+            // Check admin status for signed in user
+            const adminStatus = await checkAdminStatus(newSession.user.id);
+            console.log('Admin status after sign in:', newSession.user.id, adminStatus);
+            if (isMounted) {
               setIsAdmin(adminStatus);
               setLoading(false);
+              setInitialized(true);
             }
           } catch (error) {
-            console.error('Error during admin check:', error);
-            if (mounted) {
+            console.error('Error handling sign in:', error);
+            if (isMounted) {
               setIsAdmin(false);
               setLoading(false);
+              setInitialized(true);
             }
           }
-        } else {
-          if (mounted) {
+        } else if (event === 'SIGNED_OUT') {
+          try {
+            await securityMonitor.logEvent({
+              event_type: 'login_success',
+              details: { action: 'logout' },
+              severity: 'low'
+            });
+          } catch (error) {
+            console.error('Error logging sign out:', error);
+          }
+          if (isMounted) {
             setIsAdmin(false);
             setLoading(false);
+            setInitialized(true);
+          }
+        } else if (!newSession) {
+          if (isMounted) {
+            setIsAdmin(false);
+            setLoading(false);
+            setInitialized(true);
           }
         }
       }
     );
 
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting initial session:', error);
-          if (mounted) setLoading(false);
-          return;
-        }
-
-        console.log('Initial session:', session?.user?.id);
-        
-        if (!mounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          try {
-            const adminStatus = await checkAdminStatus(session.user.id);
-            console.log('Initial admin status:', session.user.id, adminStatus);
-            if (mounted) {
-              setIsAdmin(adminStatus);
-            }
-          } catch (error) {
-            console.error('Error during initial admin check:', error);
-            if (mounted) {
-              setIsAdmin(false);
-            }
-          }
-        }
-        
-        if (mounted) {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
-
     return () => {
-      mounted = false;
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
