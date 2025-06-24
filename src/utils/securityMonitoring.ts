@@ -35,19 +35,11 @@ export class SecurityMonitor {
       // Store locally for immediate access
       this.events.push(enrichedEvent);
 
-      // Persist to database with proper error handling
-      try {
-        const { error } = await supabase
-          .from('security_events')
-          .insert([enrichedEvent]);
-        
-        if (error) {
-          console.warn('Failed to log security event to database:', error);
-        }
-      } catch (dbError) {
-        // Silently fail if table doesn't exist or other DB issues
-        console.warn('Security events table not available:', dbError);
-      }
+      // Persist to database (if table exists)
+      await supabase.from('security_events').insert([enrichedEvent]).catch(() => {
+        // Silently fail if table doesn't exist yet
+        console.warn('Security events table not available');
+      });
 
       // Log high severity events to console for immediate attention
       if (event.severity === 'high' || event.severity === 'critical') {

@@ -11,7 +11,6 @@ import {
   sanitizeEmail, 
   contactFormRateLimit 
 } from '@/utils/inputValidation';
-import { securityMonitor } from '@/utils/securityMonitoring';
 import { z } from 'zod';
 
 const ContactForm = () => {
@@ -78,23 +77,19 @@ const ContactForm = () => {
         email: sanitizeEmail(validatedData.email),
         phone: validatedData.phone ? sanitizeText(validatedData.phone) : null,
         subject: sanitizeText(validatedData.subject),
-        message: sanitizeText(validatedData.message),
-        submitted_at: new Date().toISOString(),
-        ip_address: 'hidden', // In production, log IP for security
-        user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
+        message: sanitizeText(validatedData.message)
       };
 
       const { error } = await supabase
         .from('contact_submissions')
-        .insert([sanitizedData]);
+        .insert([{
+          ...sanitizedData,
+          submitted_at: new Date().toISOString(),
+          ip_address: 'hidden', // In production, log IP for security
+          user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
+        }]);
 
       if (error) throw error;
-
-      // Log successful form submission
-      await securityMonitor.logFormSubmission('contact', true, {
-        name_length: sanitizedData.name.length,
-        has_phone: !!sanitizedData.phone
-      });
 
       toast({
         title: "Message envoyé !",
@@ -112,11 +107,6 @@ const ContactForm = () => {
 
     } catch (error) {
       console.error('Erreur lors de l\'envoi:', error);
-      
-      // Log failed form submission
-      await securityMonitor.logFormSubmission('contact', false, {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
       
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
