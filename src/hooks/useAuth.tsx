@@ -50,8 +50,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const initAuth = async () => {
       try {
-        // Get initial session
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        console.log('Starting auth initialization');
+        
+        // Get initial session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 10000)
+        );
+        
+        const { data: { session: initialSession }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
         
         if (error) {
           console.error('Error getting initial session:', error);
@@ -64,17 +74,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        console.log('Initial session:', initialSession?.user?.id);
+        console.log('Initial session retrieved:', !!initialSession);
         
         if (isMounted) {
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
-          // Only check admin status if user exists
           if (initialSession?.user) {
             try {
               const adminStatus = await checkAdminStatus(initialSession.user.id);
-              console.log('Initial admin status:', initialSession.user.id, adminStatus);
+              console.log('Initial admin status:', adminStatus);
               if (isMounted) {
                 setIsAdmin(adminStatus);
               }
@@ -101,26 +110,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    initAuth();
-
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log('Auth state change:', event, newSession?.user?.id);
+        console.log('Auth state change:', event, !!newSession);
         
         if (!isMounted) return;
         
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
-        // Handle auth events
         if (event === 'SIGNED_IN' && newSession?.user) {
           try {
             await securityMonitor.logLoginAttempt(true, newSession.user.email);
-            
-            // Check admin status for signed in user
             const adminStatus = await checkAdminStatus(newSession.user.id);
-            console.log('Admin status after sign in:', newSession.user.id, adminStatus);
+            console.log('Admin status after sign in:', adminStatus);
             if (isMounted) {
               setIsAdmin(adminStatus);
             }
@@ -155,6 +159,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     );
+
+    // Initialize auth
+    initAuth();
 
     return () => {
       isMounted = false;
