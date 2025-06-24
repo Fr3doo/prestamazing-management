@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
   const checkAdminStatus = async (userId: string): Promise<boolean> => {
     try {
@@ -48,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
 
     const initAuth = async () => {
       try {
@@ -58,8 +56,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (error) {
           console.error('Error getting initial session:', error);
           if (isMounted) {
+            setUser(null);
+            setSession(null);
+            setIsAdmin(false);
             setLoading(false);
-            setInitialized(true);
           }
           return;
         }
@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
+          // Only check admin status if user exists
           if (initialSession?.user) {
             try {
               const adminStatus = await checkAdminStatus(initialSession.user.id);
@@ -88,25 +89,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           
           setLoading(false);
-          setInitialized(true);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (isMounted) {
+          setUser(null);
+          setSession(null);
+          setIsAdmin(false);
           setLoading(false);
-          setInitialized(true);
         }
       }
     };
-
-    // Set up timeout to prevent infinite loading
-    timeoutId = setTimeout(() => {
-      if (isMounted && !initialized) {
-        console.warn('Auth initialization timeout - forcing completion');
-        setLoading(false);
-        setInitialized(true);
-      }
-    }, 5000);
 
     initAuth();
 
@@ -130,15 +123,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.log('Admin status after sign in:', newSession.user.id, adminStatus);
             if (isMounted) {
               setIsAdmin(adminStatus);
-              setLoading(false);
-              setInitialized(true);
             }
           } catch (error) {
             console.error('Error handling sign in:', error);
             if (isMounted) {
               setIsAdmin(false);
-              setLoading(false);
-              setInitialized(true);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -153,22 +142,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           if (isMounted) {
             setIsAdmin(false);
-            setLoading(false);
-            setInitialized(true);
           }
         } else if (!newSession) {
           if (isMounted) {
             setIsAdmin(false);
-            setLoading(false);
-            setInitialized(true);
           }
+        }
+        
+        // Always set loading to false after auth state change
+        if (isMounted) {
+          setLoading(false);
         }
       }
     );
 
     return () => {
       isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
