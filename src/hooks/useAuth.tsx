@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
+  initialized: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -19,7 +20,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const checkAdminStatus = async (userId: string) => {
     try {
@@ -43,10 +45,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
+        
+        if (!isMounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -61,36 +68,84 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         }
         
-        // Defer admin check to avoid blocking the auth state change
-        if (session?.user) {
-          setTimeout(async () => {
+        // Handle admin status check
+        if (session?.user && isMounted) {
+          setLoading(true);
+          try {
             const adminStatus = await checkAdminStatus(session.user.id);
             console.log('Admin status for user:', session.user.id, adminStatus);
-            setIsAdmin(adminStatus);
-            setLoading(false);
-          }, 100);
+            if (isMounted) {
+              setIsAdmin(adminStatus);
+            }
+          } catch (error) {
+            console.error('Error during admin check:', error);
+            if (isMounted) {
+              setIsAdmin(false);
+            }
+          } finally {
+            if (isMounted) {
+              setLoading(false);
+              setInitialized(true);
+            }
+          }
         } else {
-          setIsAdmin(false);
-          setLoading(false);
+          if (isMounted) {
+            setIsAdmin(false);
+            setLoading(false);
+            setInitialized(true);
+          }
         }
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const adminStatus = await checkAdminStatus(session.user.id);
-        console.log('Initial admin status:', session.user.id, adminStatus);
-        setIsAdmin(adminStatus);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Initial session:', session?.user?.id);
+        
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setLoading(true);
+          try {
+            const adminStatus = await checkAdminStatus(session.user.id);
+            console.log('Initial admin status:', session.user.id, adminStatus);
+            if (isMounted) {
+              setIsAdmin(adminStatus);
+            }
+          } catch (error) {
+            console.error('Error during initial admin check:', error);
+            if (isMounted) {
+              setIsAdmin(false);
+            }
+          } finally {
+            if (isMounted) {
+              setLoading(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error during auth initialization:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      } finally {
+        if (isMounted) {
+          setInitialized(true);
+        }
       }
-      setLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -122,6 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       session,
       isAdmin,
       loading,
+      initialized,
       signIn,
       signOut,
     }}>

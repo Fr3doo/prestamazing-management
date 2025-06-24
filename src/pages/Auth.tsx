@@ -11,16 +11,18 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
+  const { signIn, user, isAdmin, loading: authLoading, initialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Seulement rediriger si l'authentification est complètement chargée
-    if (!authLoading && user) {
+    // Only process redirect logic if auth is fully initialized and we have a user
+    if (initialized && user) {
+      console.log('Auth initialized, user:', user.id, 'isAdmin:', isAdmin);
+      
       if (isAdmin) {
-        console.log('Redirecting to admin dashboard');
-        navigate('/admin');
+        console.log('User is admin, redirecting to admin dashboard');
+        navigate('/admin', { replace: true });
       } else {
         console.log('User is not admin, showing error');
         toast({
@@ -28,10 +30,10 @@ const Auth = () => {
           description: "Vous n'avez pas les droits d'administration.",
           variant: "destructive",
         });
-        // Ne pas rediriger, laisser l'utilisateur sur la page de connexion
+        // Don't redirect non-admin users, let them stay on auth page
       }
     }
-  }, [user, isAdmin, authLoading, navigate, toast]);
+  }, [user, isAdmin, initialized, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +54,8 @@ const Auth = () => {
     setLoading(false);
   };
 
-  // Afficher un indicateur de chargement pendant la vérification d'auth initiale
-  if (authLoading) {
+  // Show loading state only while auth is initializing
+  if (!initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-lg">Vérification des droits d'accès...</div>

@@ -35,11 +35,13 @@ export class SecurityMonitor {
       // Store locally for immediate access
       this.events.push(enrichedEvent);
 
-      // Persist to database (if table exists)
-      await supabase.from('security_events').insert([enrichedEvent]).catch(() => {
+      // Try to persist to database (gracefully handle if table doesn't exist)
+      try {
+        await supabase.from('security_events').insert([enrichedEvent]);
+      } catch (dbError) {
         // Silently fail if table doesn't exist yet
-        console.warn('Security events table not available');
-      });
+        console.warn('Security events table not available:', dbError);
+      }
 
       // Log high severity events to console for immediate attention
       if (event.severity === 'high' || event.severity === 'critical') {
