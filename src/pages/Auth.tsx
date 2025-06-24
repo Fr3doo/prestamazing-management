@@ -16,6 +16,13 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Timeout pour éviter les boucles infinies de chargement
+    const timeout = setTimeout(() => {
+      if (authLoading) {
+        console.warn('Auth loading timeout - forcing completion');
+      }
+    }, 10000); // 10 secondes
+
     // Seulement rediriger si l'authentification est complètement chargée
     if (!authLoading && user) {
       if (isAdmin) {
@@ -31,6 +38,8 @@ const Auth = () => {
         // Ne pas rediriger, laisser l'utilisateur sur la page de connexion
       }
     }
+
+    return () => clearTimeout(timeout);
   }, [user, isAdmin, authLoading, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,10 +62,27 @@ const Auth = () => {
   };
 
   // Afficher un indicateur de chargement pendant la vérification d'auth initiale
+  // Mais avec un timeout pour éviter les blocages
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg">Vérification des droits d'accès...</div>
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-lg mb-4">Vérification des droits d'accès...</div>
+              <div className="text-sm text-gray-600">
+                Si cette page reste affichée, veuillez rafraîchir la page.
+              </div>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline" 
+                className="mt-4"
+              >
+                Rafraîchir la page
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
