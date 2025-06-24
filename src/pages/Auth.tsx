@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const { signIn, user, isAdmin, loading: authLoading, initialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -35,7 +35,7 @@ const Auth = () => {
       return;
     }
 
-    setLoading(true);
+    setFormLoading(true);
 
     try {
       console.log('Attempting to sign in with:', email);
@@ -58,7 +58,7 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -122,7 +122,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
+                disabled={formLoading || authLoading}
               />
             </div>
             <div>
@@ -132,15 +132,15 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={loading}
+                disabled={formLoading || authLoading}
               />
             </div>
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={loading}
+              disabled={formLoading || authLoading}
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {formLoading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>
         </CardContent>

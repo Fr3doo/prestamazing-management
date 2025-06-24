@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   const checkAdminStatus = async (userId: string): Promise<boolean> => {
@@ -53,7 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initAuth = async () => {
       try {
         console.log('Starting auth initialization');
-        setLoading(true);
         
         // Get initial session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -85,8 +84,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsAdmin(false);
           }
           
-          setLoading(false);
+          // Always set initialized to true after processing
           setInitialized(true);
+          console.log('Auth initialization completed');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -94,8 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
           setSession(null);
           setIsAdmin(false);
-          setLoading(false);
-          setInitialized(true);
+          setInitialized(true); // Set to true even on error
         }
       }
     };
@@ -143,9 +142,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
-        // Set loading to false and initialized to true after auth state change
-        if (isMounted) {
-          setLoading(false);
+        // Ensure initialization is complete
+        if (isMounted && !initialized) {
           setInitialized(true);
         }
       }
@@ -162,6 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -176,6 +175,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await securityMonitor.logLoginAttempt(false, email, errorMessage);
       return { error };
+    } finally {
+      setLoading(false);
     }
   };
 
