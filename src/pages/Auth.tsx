@@ -11,46 +11,59 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
+  const { signIn, user, isAdmin, loading: authLoading, initialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Only redirect if user is authenticated AND is admin
-    if (user && !authLoading && isAdmin) {
+    // Only redirect if user is authenticated AND is admin AND auth is initialized
+    if (initialized && user && isAdmin) {
       console.log('Redirecting to admin dashboard');
       navigate('/admin');
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, isAdmin, initialized, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    console.log('Attempting to sign in with:', email);
-    const { error } = await signIn(email, password);
-
-    if (error) {
-      console.error('Sign in error:', error);
+    
+    if (!email || !password) {
       toast({
-        title: "Erreur de connexion",
-        description: error.message,
+        title: "Erreur",
+        description: "Veuillez saisir votre email et mot de passe.",
         variant: "destructive",
       });
-    } else if (user && !isAdmin) {
-      // Show error only after successful login but user is not admin
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits d'administration.",
-        variant: "destructive",
-      });
+      return;
     }
 
-    setLoading(false);
+    setLoading(true);
+
+    try {
+      console.log('Attempting to sign in with:', email);
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        console.error('Sign in error:', error);
+        toast({
+          title: "Erreur de connexion",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      // Note: Success handling and redirection is managed by useEffect above
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Show loading only during initial auth check
-  if (authLoading) {
+  if (!initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
@@ -58,6 +71,30 @@ const Auth = () => {
             <div className="text-center">
               <div className="text-lg mb-4">Initialisation...</div>
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If user is authenticated but not admin, show access denied
+  if (initialized && user && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-lg mb-4 text-red-600">Accès refusé</div>
+              <p className="text-gray-600 mb-4">
+                Vous n'avez pas les droits d'administration.
+              </p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+              >
+                Réessayer
+              </Button>
             </div>
           </CardContent>
         </Card>

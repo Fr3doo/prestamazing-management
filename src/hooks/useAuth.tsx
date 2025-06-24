@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
+  initialized: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const checkAdminStatus = async (userId: string): Promise<boolean> => {
     try {
@@ -51,27 +53,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initAuth = async () => {
       try {
         console.log('Starting auth initialization');
+        setLoading(true);
         
-        // Get initial session with timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 10000)
-        );
-        
-        const { data: { session: initialSession }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        // Get initial session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
-          if (isMounted) {
-            setUser(null);
-            setSession(null);
-            setIsAdmin(false);
-            setLoading(false);
-          }
-          return;
         }
 
         console.log('Initial session retrieved:', !!initialSession);
@@ -98,6 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           
           setLoading(false);
+          setInitialized(true);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -106,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(null);
           setIsAdmin(false);
           setLoading(false);
+          setInitialized(true);
         }
       }
     };
@@ -153,9 +143,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
-        // Always set loading to false after auth state change
+        // Set loading to false and initialized to true after auth state change
         if (isMounted) {
           setLoading(false);
+          setInitialized(true);
         }
       }
     );
@@ -198,6 +189,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       session,
       isAdmin,
       loading,
+      initialized,
       signIn,
       signOut,
     }}>
