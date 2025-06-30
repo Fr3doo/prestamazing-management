@@ -40,7 +40,7 @@ export const useAuthNavigation = ({ user, isAdmin, initialized }: UseAuthNavigat
   // Logique de navigation basée sur l'état auth
   useEffect(() => {
     if (initialized && user && isAdmin) {
-      emit('navigation:redirect-to-admin');
+      emit('navigation:redirect-to-admin', undefined);
     }
   }, [initialized, user, isAdmin, emit]);
 };
