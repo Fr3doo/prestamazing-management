@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Règles de validation centralisées et utilisées
@@ -66,4 +65,11 @@ export const reviewValidationSchema = z.object({
   name: ValidationRules.name,
   rating: ValidationRules.rating,
   comment: ValidationRules.longText,
+});
+
+// Nouveau schéma pour ContactInfo
+export const contactInfoValidationSchema = z.object({
+  type: z.string().min(1, "Le type est obligatoire"),
+  value: z.string().min(1, "La valeur est obligatoire"),
+  label: z.string().optional(),
 });
