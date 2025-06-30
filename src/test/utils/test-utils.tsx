@@ -1,7 +1,5 @@
-
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, RenderOptions, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ServiceProvider } from '@/providers/ServiceProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
