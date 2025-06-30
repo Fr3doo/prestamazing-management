@@ -1,18 +1,19 @@
+
 import DOMPurify from 'dompurify';
 import { 
   contactFormSchema, 
   contentSectionSchema, 
-  reviewValidationSchema as reviewSchema 
+  reviewValidationSchema 
 } from './validationRules';
 
-// Re-export schemas for backward compatibility
+// Re-export des schémas pour compatibilité
 export { 
   contactFormSchema, 
   contentSectionSchema, 
-  reviewSchema as reviewValidationSchema 
+  reviewValidationSchema 
 };
 
-// Input sanitization utilities
+// Utilitaires de sanitisation utilisés
 export const sanitizeHtml = (input: string): string => {
   return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
 };
@@ -25,7 +26,7 @@ export const sanitizeEmail = (email: string): string => {
   return email.toLowerCase().trim();
 };
 
-// Rate limiting utility
+// Rate limiting simplifié
 export class RateLimiter {
   private attempts: Map<string, { count: number; resetTime: number }> = new Map();
   
@@ -46,14 +47,6 @@ export class RateLimiter {
     
     record.count++;
     return true;
-  }
-  
-  getRemainingTime(identifier: string): number {
-    const record = this.attempts.get(identifier);
-    if (!record) return 0;
-    
-    const now = Date.now();
-    return Math.max(0, record.resetTime - now);
   }
 }
 

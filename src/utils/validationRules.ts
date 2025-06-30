@@ -1,9 +1,8 @@
 
 import { z } from 'zod';
 
-// Centralized validation rules
+// Règles de validation centralisées et utilisées
 export const ValidationRules = {
-  // Common field validations
   name: z.string()
     .min(2, 'Le nom doit contenir au moins 2 caractères')
     .max(100, 'Le nom ne peut pas dépasser 100 caractères')
@@ -43,29 +42,7 @@ export const ValidationRules = {
     .regex(/^[a-z0-9_]+$/, 'La clé de section ne peut contenir que des lettres minuscules, chiffres et underscores'),
 };
 
-// Domain-specific schemas using centralized rules
-export const reviewValidationSchema = z.object({
-  name: ValidationRules.name,
-  rating: ValidationRules.rating,
-  comment: ValidationRules.longText,
-  position: ValidationRules.text.optional(),
-  company: ValidationRules.text.optional(),
-});
-
-export const partnerValidationSchema = z.object({
-  name: ValidationRules.name,
-  logo_url: ValidationRules.url,
-  website_url: ValidationRules.url,
-  description: ValidationRules.longText.optional(),
-});
-
-export const contactInfoValidationSchema = z.object({
-  type: ValidationRules.text,
-  label: ValidationRules.text.optional(),
-  value: ValidationRules.text,
-});
-
-// Update existing schemas to use centralized rules
+// Schémas utilisés dans l'application
 export const contactFormSchema = z.object({
   name: ValidationRules.name,
   email: ValidationRules.email,
@@ -83,4 +60,10 @@ export const contentSectionSchema = z.object({
     .max(5000, 'Le contenu ne peut pas dépasser 5000 caractères')
     .optional(),
   image_url: ValidationRules.url
+});
+
+export const reviewValidationSchema = z.object({
+  name: ValidationRules.name,
+  rating: ValidationRules.rating,
+  comment: ValidationRules.longText,
 });

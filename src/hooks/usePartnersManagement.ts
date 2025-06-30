@@ -9,7 +9,6 @@ export interface Partner {
   partner_name: string;
   logo_url: string;
   website_url?: string;
-  description?: string;
   display_order: number;
   created_at: string;
   updated_at: string;
@@ -57,8 +56,7 @@ export const usePartnersManagement = () => {
 
   const filteredPartners = partners.filter(partner =>
     !searchTerm || 
-    partner.partner_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (partner.description && partner.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    partner.partner_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {

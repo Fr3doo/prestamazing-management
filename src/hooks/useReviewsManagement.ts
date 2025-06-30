@@ -9,8 +9,6 @@ export interface Review {
   user_name: string;
   rating: number;
   comment: string;
-  position?: string;
-  company?: string;
   created_at: string;
   updated_at: string;
 }
@@ -20,7 +18,7 @@ export const useReviewsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState<number | null>(null);
-  const { showSuccess, showError } = useStandardToast();
+  const { showSuccess } = useStandardToast();
   const { handleError } = useErrorHandler();
 
   const fetchReviews = async () => {
