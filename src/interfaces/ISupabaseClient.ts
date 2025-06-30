@@ -1,8 +1,9 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface ISupabaseClient {
-  client: SupabaseClient;
-  from(table: string): any;
+  client: SupabaseClient<Database>;
+  from<T extends keyof Database['public']['Tables']>(table: T): any;
   auth: any;
 }

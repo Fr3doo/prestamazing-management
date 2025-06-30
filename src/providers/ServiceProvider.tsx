@@ -8,6 +8,7 @@ import { AuthService } from '@/services/AuthService';
 import { AdminService } from '@/services/AdminService';
 import { securityMonitor } from '@/utils/securityMonitoring';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 interface ServiceContextType {
   authService: IAuthService;
@@ -26,7 +27,7 @@ interface ServiceProviderProps {
 class SupabaseClientWrapper implements ISupabaseClient {
   client = supabase;
   
-  from(table: string) {
+  from<T extends keyof Database['public']['Tables']>(table: T) {
     return this.client.from(table);
   }
   
