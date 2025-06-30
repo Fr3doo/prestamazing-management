@@ -3,6 +3,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { securityMonitor } from '@/utils/securityMonitoring';
+import { useAdminCheck } from './useAdminCheck';
 
 interface AuthContextType {
   user: User | null;
@@ -19,30 +20,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  const checkAdminStatus = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .single();
-      
-      console.log('Admin check result:', { data, error, userId });
-      return !!data && !error;
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      await securityMonitor.logSuspiciousActivity('admin_check_failed', {
-        user_id: userId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      return false;
-    }
-  };
+  // Use the separated admin check hook
+  const { isAdmin, loading: adminLoading } = useAdminCheck(user);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,38 +43,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await securityMonitor.logLoginAttempt(true, session.user.email);
         } else if (event === 'SIGNED_OUT') {
           await securityMonitor.logEvent({
-            event_type: 'login_success', // Using for logout too
+            event_type: 'login_success',
             details: { action: 'logout' },
             severity: 'low'
           });
         }
         
-        // Handle admin status check
-        if (session?.user && isMounted) {
-          setLoading(true);
-          try {
-            const adminStatus = await checkAdminStatus(session.user.id);
-            console.log('Admin status for user:', session.user.id, adminStatus);
-            if (isMounted) {
-              setIsAdmin(adminStatus);
-            }
-          } catch (error) {
-            console.error('Error during admin check:', error);
-            if (isMounted) {
-              setIsAdmin(false);
-            }
-          } finally {
-            if (isMounted) {
-              setLoading(false);
-              setInitialized(true);
-            }
-          }
-        } else {
-          if (isMounted) {
-            setIsAdmin(false);
-            setLoading(false);
-            setInitialized(true);
-          }
+        if (isMounted) {
+          setInitialized(true);
         }
       }
     );
@@ -108,31 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setLoading(true);
-          try {
-            const adminStatus = await checkAdminStatus(session.user.id);
-            console.log('Initial admin status:', session.user.id, adminStatus);
-            if (isMounted) {
-              setIsAdmin(adminStatus);
-            }
-          } catch (error) {
-            console.error('Error during initial admin check:', error);
-            if (isMounted) {
-              setIsAdmin(false);
-            }
-          } finally {
-            if (isMounted) {
-              setLoading(false);
-            }
-          }
-        }
       } catch (error) {
         console.error('Error during auth initialization:', error);
-        if (isMounted) {
-          setLoading(false);
-        }
       } finally {
         if (isMounted) {
           setInitialized(true);
@@ -170,6 +104,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
   };
+
+  // Combine auth loading with admin loading for backward compatibility
+  const loading = adminLoading;
 
   return (
     <AuthContext.Provider value={{
