@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useServices } from '@/providers/ServiceProvider';
+import { useRepositories } from '@/hooks/useRepositories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +35,8 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { partnerService } = useServices();
+  const { partnerRepository } = useRepositories();
 
   useEffect(() => {
     if (partner) {
@@ -80,20 +83,7 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
   };
 
   const uploadLogo = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `partners/${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('partners-logos')
-      .upload(fileName, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('partners-logos')
-      .getPublicUrl(fileName);
-
-    return publicUrl;
+    return partnerService.uploadPartnerLogo(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,43 +120,25 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
       }
 
       if (partner) {
-        // Mise à jour
-        const { error } = await supabase
-          .from('partners_logos')
-          .update({
-            partner_name: formData.partner_name.trim(),
-            website_url: formData.website_url.trim() || null,
-            logo_url: logoUrl,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', partner.id);
-
-        if (error) throw error;
+        await partnerRepository.updatePartner(partner.id, {
+          partner_name: formData.partner_name.trim(),
+          website_url: formData.website_url.trim() || null,
+          logo_url: logoUrl,
+          updated_at: new Date().toISOString(),
+        });
 
         toast({
           title: "Succès",
           description: "Partenaire mis à jour avec succès",
         });
       } else {
-        // Création - récupérer le prochain display_order
-        const { data: maxOrderData } = await supabase
-          .from('partners_logos')
-          .select('display_order')
-          .order('display_order', { ascending: false })
-          .limit(1);
-
-        const nextOrder = (maxOrderData?.[0]?.display_order || 0) + 1;
-
-        const { error } = await supabase
-          .from('partners_logos')
-          .insert({
-            partner_name: formData.partner_name.trim(),
-            website_url: formData.website_url.trim() || null,
-            logo_url: logoUrl,
-            display_order: nextOrder,
-          });
-
-        if (error) throw error;
+        const nextOrder = await partnerService.getNextDisplayOrder();
+        await partnerRepository.createPartner({
+          partner_name: formData.partner_name.trim(),
+          website_url: formData.website_url.trim() || null,
+          logo_url: logoUrl,
+          display_order: nextOrder,
+        });
 
         toast({
           title: "Succès",

@@ -75,4 +75,15 @@ export class SupabasePartnerRepository implements IPartnerRepository {
 
     if (error) throw error;
   }
+
+  async getMaxDisplayOrder(): Promise<number> {
+    const { data, error } = await supabase
+      .from('partners_logos')
+      .select('display_order')
+      .order('display_order', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    return data?.[0]?.display_order ?? 0;
+  }
 }

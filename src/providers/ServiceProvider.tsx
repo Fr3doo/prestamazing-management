@@ -8,6 +8,8 @@ import { IContactRepository } from '@/interfaces/repositories/IContactRepository
 import { IReviewRepository } from '@/interfaces/repositories/IReviewRepository';
 import { IContentRepository } from '@/interfaces/repositories/IContentRepository';
 import { IPartnerRepository } from '@/interfaces/repositories/IPartnerRepository';
+import { IStatisticsService } from '@/interfaces/IStatisticsService';
+import { IPartnerService } from '@/interfaces/IPartnerService';
 import { AuthService } from '@/services/AuthService';
 import { AdminService } from '@/services/AdminService';
 import { securityMonitor } from '@/utils/securityMonitoring';
@@ -16,6 +18,8 @@ import { SupabaseContactRepository } from '@/repositories/SupabaseContactReposit
 import { SupabaseReviewRepository } from '@/repositories/SupabaseReviewRepository';
 import { SupabaseContentRepository } from '@/repositories/SupabaseContentRepository';
 import { SupabasePartnerRepository } from '@/repositories/SupabasePartnerRepository';
+import { statisticsService } from '@/services/StatisticsService';
+import { PartnerService } from '@/services/PartnerService';
 import type { Database } from '@/integrations/supabase/types';
 
 interface ServiceContextType {
@@ -28,6 +32,8 @@ interface ServiceContextType {
   reviewRepository: IReviewRepository;
   contentRepository: IContentRepository;
   partnerRepository: IPartnerRepository;
+  statisticsService: IStatisticsService;
+  partnerService: IPartnerService;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
@@ -39,6 +45,8 @@ interface ServiceProviderProps {
   reviewRepository?: IReviewRepository;
   contentRepository?: IContentRepository;
   partnerRepository?: IPartnerRepository;
+  statisticsService?: IStatisticsService;
+  partnerService?: IPartnerService;
 }
 
 // Wrapper pour Supabase client
@@ -59,10 +67,12 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({
   contactRepository,
   reviewRepository,
   contentRepository,
-  partnerRepository
+  partnerRepository,
+  statisticsService: injectedStatisticsService,
+  partnerService: injectedPartnerService
 }) => {
   const supabaseClient = new SupabaseClientWrapper();
-  
+
   const services: ServiceContextType = {
     authService: AuthService,
     adminService: AdminService,
@@ -73,6 +83,8 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({
     reviewRepository: reviewRepository || new SupabaseReviewRepository(),
     contentRepository: contentRepository || new SupabaseContentRepository(),
     partnerRepository: partnerRepository || new SupabasePartnerRepository(),
+    statisticsService: injectedStatisticsService || statisticsService,
+    partnerService: injectedPartnerService || new PartnerService(partnerRepository || new SupabasePartnerRepository()),
   };
 
   return (

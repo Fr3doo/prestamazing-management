@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useServices } from '@/providers/ServiceProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Users, Phone, FileText } from 'lucide-react';
 import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
@@ -27,6 +27,8 @@ const AdminDashboard = () => {
     fullScreen: false
   });
 
+  const { statisticsService } = useServices();
+
   useEffect(() => {
     fetchStats();
   }, []);
@@ -34,19 +36,8 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     startLoading();
     try {
-      const [reviewsRes, partnersRes, contactsRes, contentRes] = await Promise.all([
-        supabase.from('reviews').select('id', { count: 'exact', head: true }),
-        supabase.from('partners_logos').select('id', { count: 'exact', head: true }),
-        supabase.from('contact_info').select('id', { count: 'exact', head: true }),
-        supabase.from('content_sections').select('id', { count: 'exact', head: true }),
-      ]);
-
-      setStats({
-        reviews: reviewsRes.count || 0,
-        partners: partnersRes.count || 0,
-        contacts: contactsRes.count || 0,
-        content: contentRes.count || 0,
-      });
+      const result = await statisticsService.getAdminStats();
+      setStats(result);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
     } finally {

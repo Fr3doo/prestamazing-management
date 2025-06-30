@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useRepositories } from '@/hooks/useRepositories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +53,8 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     }
   }, [contact]);
 
+  const { contactRepository } = useRepositories();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -65,30 +67,18 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
 
     try {
       if (contact) {
-        // Mise à jour
-        const { error } = await supabase
-          .from('contact_info')
-          .update({
-            type: formData.type.trim(),
-            value: formData.value.trim(),
-            label: formData.label.trim() || null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', contact.id);
-
-        if (error) throw error;
+        await contactRepository.updateContactInfo(contact.id, {
+          type: formData.type.trim(),
+          value: formData.value.trim(),
+          label: formData.label.trim() || null,
+        });
         showSuccess("Succès", "Information de contact mise à jour");
       } else {
-        // Création
-        const { error } = await supabase
-          .from('contact_info')
-          .insert({
-            type: formData.type.trim(),
-            value: formData.value.trim(),
-            label: formData.label.trim() || null,
-          });
-
-        if (error) throw error;
+        await contactRepository.createContactInfo({
+          type: formData.type.trim(),
+          value: formData.value.trim(),
+          label: formData.label.trim() || undefined,
+        });
         showSuccess("Succès", "Information de contact créée");
       }
 
