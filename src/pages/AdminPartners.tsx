@@ -1,15 +1,20 @@
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import BaseAdminPage from '@/components/Admin/BaseAdminPage';
 import PartnersManagement from '@/components/Admin/PartnersManagement';
-import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const AdminPartners = () => {
   return (
-    <AdminLayout>
+    <BaseAdminPage
+      title="Gestion des partenaires"
+      description="Gérez les logos et informations de vos partenaires"
+      breadcrumbs={[
+        { label: 'Partenaires' }
+      ]}
+    >
       <PartnersManagement />
-    </AdminLayout>
+    </BaseAdminPage>
   );
 };
 
-export default withAdminProtection(AdminPartners);
+export default AdminPartners;

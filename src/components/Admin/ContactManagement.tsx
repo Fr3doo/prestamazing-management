@@ -108,20 +108,16 @@ const ContactManagement = () => {
   const uniqueTypes = [...new Set(contacts.map(c => c.type))];
 
   if (loading) {
-    return (
-      <div className="p-6">
-        {LoadingComponent}
-      </div>
-    );
+    return LoadingComponent;
   }
 
   if (showForm) {
     return (
-      <div className="p-6">
+      <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900">
             {editingContact ? 'Modifier le contact' : 'Ajouter un contact'}
-          </h1>
+          </h2>
         </div>
         <ContactInfoForm
           contact={editingContact}
@@ -133,7 +129,7 @@ const ContactManagement = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <ContactHeader onAddContact={handleAddContact} />
       
       <ContactSearchFilter

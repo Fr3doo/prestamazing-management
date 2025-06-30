@@ -1,15 +1,20 @@
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import BaseAdminPage from '@/components/Admin/BaseAdminPage';
 import ContactManagement from '@/components/Admin/ContactManagement';
-import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const AdminContacts = () => {
   return (
-    <AdminLayout>
+    <BaseAdminPage
+      title="Gestion des contacts"
+      description="Gérez les informations de contact affichées sur le site"
+      breadcrumbs={[
+        { label: 'Contacts' }
+      ]}
+    >
       <ContactManagement />
-    </AdminLayout>
+    </BaseAdminPage>
   );
 };
 
-export default withAdminProtection(AdminContacts);
+export default AdminContacts;

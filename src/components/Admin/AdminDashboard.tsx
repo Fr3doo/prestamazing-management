@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Users, Phone, FileText } from 'lucide-react';
 import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
+import BaseAdminPage from './BaseAdminPage';
 
 interface Stats {
   reviews: number;
@@ -84,25 +85,10 @@ const AdminDashboard = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-          <p className="text-gray-600">Vue d'ensemble de votre contenu</p>
-        </div>
-        {LoadingComponent}
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-        <p className="text-gray-600">Vue d'ensemble de votre contenu</p>
-      </div>
-
+  const content = loading ? (
+    LoadingComponent
+  ) : (
+    <>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {statsCards.map((card) => (
           <Card key={card.title}>
@@ -163,7 +149,16 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <BaseAdminPage
+      title="Tableau de bord"
+      description="Vue d'ensemble de votre contenu"
+    >
+      {content}
+    </BaseAdminPage>
   );
 };
 

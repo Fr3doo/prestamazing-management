@@ -1,15 +1,20 @@
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import BaseAdminPage from '@/components/Admin/BaseAdminPage';
 import ReviewsManagement from '@/components/Admin/ReviewsManagement';
-import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const AdminReviews = () => {
   return (
-    <AdminLayout>
+    <BaseAdminPage
+      title="Gestion des avis"
+      description="Gérez les avis clients de votre site"
+      breadcrumbs={[
+        { label: 'Avis clients' }
+      ]}
+    >
       <ReviewsManagement />
-    </AdminLayout>
+    </BaseAdminPage>
   );
 };
 
-export default withAdminProtection(AdminReviews);
+export default AdminReviews;

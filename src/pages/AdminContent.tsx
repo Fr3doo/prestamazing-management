@@ -1,15 +1,20 @@
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import BaseAdminPage from '@/components/Admin/BaseAdminPage';
 import ContentManagement from '@/components/Admin/ContentManagement';
-import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const AdminContent = () => {
   return (
-    <AdminLayout>
+    <BaseAdminPage
+      title="Gestion du contenu"
+      description="Gérez le contenu de toutes les pages du site"
+      breadcrumbs={[
+        { label: 'Contenu' }
+      ]}
+    >
       <ContentManagement />
-    </AdminLayout>
+    </BaseAdminPage>
   );
 };
 
-export default withAdminProtection(AdminContent);
+export default AdminContent;

@@ -80,20 +80,16 @@ const ContentManagement = () => {
   );
 
   if (loading) {
-    return (
-      <div className="p-6">
-        {LoadingComponent}
-      </div>
-    );
+    return LoadingComponent;
   }
 
   if (showForm) {
     return (
-      <div className="p-6">
+      <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900">
             {editingSection ? 'Modifier la section' : 'Ajouter une section'}
-          </h1>
+          </h2>
         </div>
         <ContentForm
           section={editingSection}
@@ -105,7 +101,7 @@ const ContentManagement = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <ContentHeader onAddSection={handleAddSection} />
       <ContentSearchFilter 
         searchTerm={searchTerm}

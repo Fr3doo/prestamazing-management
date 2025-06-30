@@ -1,15 +1,9 @@
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminDashboard from '@/components/Admin/AdminDashboard';
-import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const Admin = () => {
-  return (
-    <AdminLayout>
-      <AdminDashboard />
-    </AdminLayout>
-  );
+  return <AdminDashboard />;
 };
 
-export default withAdminProtection(Admin);
+export default Admin;
