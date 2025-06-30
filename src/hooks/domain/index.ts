@@ -1,4 +1,3 @@
-
 // Domain-specific hooks for data management
 export { useReviews } from '../useReviews';
 export { usePartners } from '../usePartners';
@@ -14,3 +13,7 @@ export { useContactManagement } from '../useContactManagement';
 // Types re-exports for convenience
 export type { Review } from '../useReviewsManagement';
 export type { Partner } from '../usePartnersManagement';
+
+// Navigation hooks
+export { useNavigation } from '../useNavigation';
+export type { NavigationItem, UseNavigationOptions } from '../useNavigation';

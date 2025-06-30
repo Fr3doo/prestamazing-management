@@ -1,69 +1,21 @@
 
-import React, { memo, useMemo, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
+import React, { memo } from 'react';
+import { NavigationItem } from '@/hooks/useNavigation';
+import { defaultAdminNavigation } from '@/config/adminNavigation';
+import AdminHeader from './AdminHeader';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  navigationItems?: NavigationItem[];
 }
 
-const AdminLayout = memo(({ children }: AdminLayoutProps) => {
-  const { signOut } = useAuth();
-  const location = useLocation();
-
-  const navItems = useMemo(() => [
-    { path: '/admin', label: 'Tableau de bord', exact: true },
-    { path: '/admin/reviews', label: 'Avis clients' },
-    { path: '/admin/partners', label: 'Partenaires' },
-    { path: '/admin/content', label: 'Contenu' },
-    { path: '/admin/contacts', label: 'Contacts' },
-    { path: '/admin/advanced', label: 'Avancé' },
-  ], []);
-
-  const isActiveRoute = useCallback((path: string, exact = false) => {
-    if (exact) {
-      return location.pathname === path;
-    }
-    return location.pathname.startsWith(path);
-  }, [location.pathname]);
-
-  const handleSignOut = useCallback(() => {
-    signOut();
-  }, [signOut]);
-
+const AdminLayout = memo(({ 
+  children, 
+  navigationItems = defaultAdminNavigation 
+}: AdminLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="text-2xl font-montserrat font-bold">
-                <span className="text-secondary">S</span>teve <span className="text-secondary">PREST'A</span>
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActiveRoute(item.path, item.exact)
-                        ? 'bg-primary text-white'
-                        : 'text-gray-600 hover:text-primary'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-            <Button onClick={handleSignOut} variant="outline">
-              Déconnexion
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      <AdminHeader navigationItems={navigationItems} />
       <main className="container mx-auto">
         {children}
       </main>
