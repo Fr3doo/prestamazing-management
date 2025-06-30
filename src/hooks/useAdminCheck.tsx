@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { securityMonitor } from '@/utils/securityMonitoring';
+import { AdminService } from '@/services/AdminService';
 
 interface UseAdminCheckReturn {
   isAdmin: boolean;
@@ -15,24 +14,7 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
   const [loading, setLoading] = useState(false);
 
   const checkAdminStatus = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .single();
-      
-      console.log('Admin check result:', { data, error, userId });
-      return !!data && !error;
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      await securityMonitor.logSuspiciousActivity('admin_check_failed', {
-        user_id: userId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      return false;
-    }
+    return await AdminService.checkAdminStatus(userId);
   };
 
   useEffect(() => {
@@ -41,8 +23,12 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
     if (user) {
       setLoading(true);
       checkAdminStatus(user.id)
-        .then((adminStatus) => {
+        .then(async (adminStatus) => {
           console.log('Admin status for user:', user.id, adminStatus);
+          
+          // Log admin access attempt
+          await AdminService.logAdminAccess(user.id, adminStatus);
+          
           if (isMounted) {
             setIsAdmin(adminStatus);
           }

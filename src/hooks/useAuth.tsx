@@ -1,8 +1,7 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { securityMonitor } from '@/utils/securityMonitoring';
+import { AuthService } from '@/services/AuthService';
 import { useAdminCheck } from './useAdminCheck';
 
 interface AuthContextType {
@@ -28,26 +27,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
-        
+    // Set up auth state listener using AuthService
+    const { data: { subscription } } = AuthService.setupAuthStateListener(
+      (event, session) => {
         if (!isMounted) return;
 
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Log authentication events
-        if (event === 'SIGNED_IN' && session?.user) {
-          await securityMonitor.logLoginAttempt(true, session.user.email);
-        } else if (event === 'SIGNED_OUT') {
-          await securityMonitor.logEvent({
-            event_type: 'login_success',
-            details: { action: 'logout' },
-            severity: 'low'
-          });
-        }
         
         if (isMounted) {
           setInitialized(true);
@@ -55,10 +41,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // Get initial session
+    // Get initial session using AuthService
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { session } = await AuthService.getSession();
         console.log('Initial session:', session?.user?.id);
         
         if (!isMounted) return;
@@ -83,26 +69,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        await securityMonitor.logLoginAttempt(false, email, error.message);
-      }
-      
-      return { error };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await securityMonitor.logLoginAttempt(false, email, errorMessage);
-      return { error };
-    }
+    return await AuthService.signIn(email, password);
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await AuthService.signOut();
   };
 
   // Combine auth loading with admin loading for backward compatibility
