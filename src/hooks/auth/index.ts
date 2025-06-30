@@ -4,7 +4,6 @@ export { useAuthState } from '../useAuthState';
 export { useAuthActions } from '../useAuthActions';
 export { useAdminCheck } from '../useAdminCheck';
 
-// Types d'authentification
-export type { UseAuthStateReturn } from '../useAuthState';
-export type { UseAuthActionsReturn } from '../useAuthActions';
-export type { UseAdminCheckReturn } from '../useAdminCheck';
+// Export the correct types from the new type system
+export type { AuthState, AuthActions, AdminAuthState } from '@/types/auth';
+export type { AdminCheckResult } from '@/types/admin';
