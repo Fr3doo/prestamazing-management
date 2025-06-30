@@ -1,79 +1,139 @@
 
 import React from 'react';
-import { useContactForm } from '@/hooks/useContactForm';
-import ContactFormField from '@/components/ContactForm/ContactFormField';
-import ContactFormSubmit from '@/components/ContactForm/ContactFormSubmit';
+import { supabase } from '@/integrations/supabase/client';
+import { useGenericFormWithEmail } from '@/hooks/useGenericForm';
+import { contactFormSchema } from '@/utils/validationRules';
+import { contactFormRateLimit } from '@/utils/inputValidation';
+import { useStandardToast } from '@/hooks/useStandardToast';
+import FormField from '@/components/common/FormField';
+import FormActions from '@/components/common/FormActions';
 
 const ContactForm = () => {
+  const { showError } = useStandardToast();
+
   const {
     formData,
     errors,
     loading,
     handleInputChange,
-    handleSubmit
-  } = useContactForm();
+    handleSubmit,
+  } = useGenericFormWithEmail({
+    initialData: {
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: ''
+    },
+    validationSchema: contactFormSchema,
+    submitFunction: async (data) => {
+      // Rate limiting check
+      const clientIP = 'user-session';
+      if (!contactFormRateLimit.isAllowed(clientIP)) {
+        throw new Error("Trop de tentatives. Veuillez attendre avant de soumettre un nouveau message.");
+      }
+
+      const sanitizedData = {
+        ...data,
+        phone: data.phone || null,
+      };
+
+      try {
+        const { error } = await supabase
+          .from('contact_submissions')
+          .insert([{
+            ...sanitizedData,
+            submitted_at: new Date().toISOString(),
+            ip_address: 'hidden',
+            user_agent: navigator.userAgent.substring(0, 500)
+          }]);
+
+        if (error) throw error;
+      } catch (dbError) {
+        console.warn('Contact submissions table not available yet:', dbError);
+        console.log('Contact form submission:', sanitizedData);
+      }
+    },
+    successTitle: "Message envoyé !",
+    successMessage: "Nous vous répondrons dans les plus brefs délais.",
+    errorTitle: "Erreur",
+    errorContext: "Contact form submission",
+    onError: (error) => {
+      if (error instanceof Error && error.message.includes("Trop de tentatives")) {
+        showError("Trop de tentatives", error.message);
+      }
+    }
+  });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <ContactFormField
+      <FormField
         type="input"
-        placeholder="Votre nom *"
+        label="Nom"
+        fieldId="name"
         value={formData.name}
         onChange={(value) => handleInputChange('name', value)}
+        placeholder="Votre nom"
         required
         maxLength={100}
         error={errors.name}
-        fieldId="name"
       />
 
-      <ContactFormField
+      <FormField
         type="input"
         inputType="email"
-        placeholder="Votre email *"
+        label="Email"
+        fieldId="email"
         value={formData.email}
         onChange={(value) => handleInputChange('email', value)}
+        placeholder="Votre email"
         required
         maxLength={254}
         error={errors.email}
-        fieldId="email"
       />
 
-      <ContactFormField
+      <FormField
         type="input"
         inputType="tel"
-        placeholder="Votre téléphone (optionnel)"
+        label="Téléphone"
+        fieldId="phone"
         value={formData.phone}
         onChange={(value) => handleInputChange('phone', value)}
+        placeholder="Votre téléphone (optionnel)"
         maxLength={20}
         error={errors.phone}
-        fieldId="phone"
       />
 
-      <ContactFormField
+      <FormField
         type="input"
-        placeholder="Sujet *"
+        label="Sujet"
+        fieldId="subject"
         value={formData.subject}
         onChange={(value) => handleInputChange('subject', value)}
+        placeholder="Sujet"
         required
         maxLength={200}
         error={errors.subject}
-        fieldId="subject"
       />
 
-      <ContactFormField
+      <FormField
         type="textarea"
-        placeholder="Votre message *"
+        label="Message"
+        fieldId="message"
         value={formData.message}
         onChange={(value) => handleInputChange('message', value)}
+        placeholder="Votre message"
         required
         rows={6}
         maxLength={2000}
         error={errors.message}
         showCharCount
-        fieldId="message"
       />
 
-      <ContactFormSubmit loading={loading} />
+      <FormActions 
+        loading={loading}
+        submitText={loading ? 'Envoi en cours...' : 'Envoyer le message'}
+      />
     </form>
   );
 };

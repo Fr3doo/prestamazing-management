@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { useGenericForm } from '@/hooks/useGenericForm';
+import { reviewValidationSchema } from '@/utils/validationRules';
 import { Star } from 'lucide-react';
+import FormField from '@/components/common/FormField';
+import FormActions from '@/components/common/FormActions';
 
 interface Review {
   id: string;
@@ -24,98 +23,74 @@ interface ReviewFormProps {
 }
 
 const ReviewForm = ({ review, onSuccess, onCancel }: ReviewFormProps) => {
-  const [formData, setFormData] = useState({
-    user_name: '',
-    comment: '',
-    rating: 5,
-  });
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const {
+    formData,
+    errors,
+    loading,
+    handleInputChange,
+    handleSubmit,
+    setFormData,
+  } = useGenericForm({
+    initialData: {
+      name: review?.user_name || '',
+      comment: review?.comment || '',
+      rating: review?.rating || 5,
+    },
+    validationSchema: reviewValidationSchema,
+    submitFunction: async (data) => {
+      const submitData = {
+        user_name: data.name,
+        comment: data.comment,
+        rating: data.rating,
+      };
 
-  useEffect(() => {
-    if (review) {
-      setFormData({
-        user_name: review.user_name,
-        comment: review.comment,
-        rating: review.rating,
-      });
-    }
-  }, [review]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
       if (review) {
-        // Mise à jour
         const { error } = await supabase
           .from('reviews')
           .update({
-            user_name: formData.user_name,
-            comment: formData.comment,
-            rating: formData.rating,
+            ...submitData,
             updated_at: new Date().toISOString(),
           })
           .eq('id', review.id);
 
         if (error) throw error;
-
-        toast({
-          title: "Succès",
-          description: "Avis mis à jour avec succès",
-        });
       } else {
-        // Création
         const { error } = await supabase
           .from('reviews')
-          .insert({
-            user_name: formData.user_name,
-            comment: formData.comment,
-            rating: formData.rating,
-          });
+          .insert([submitData]);
 
         if (error) throw error;
-
-        toast({
-          title: "Succès",
-          description: "Avis ajouté avec succès",
-        });
       }
-
-      onSuccess();
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder l'avis",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    successTitle: "Succès",
+    successMessage: review ? "Avis mis à jour avec succès" : "Avis ajouté avec succès",
+    errorTitle: "Erreur",
+    errorContext: "Review form submission",
+    onSuccess,
+  });
 
   const handleRatingClick = (rating: number) => {
-    setFormData({ ...formData, rating });
+    setFormData(prev => ({ ...prev, rating }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="user_name">Nom du client</Label>
-        <Input
-          id="user_name"
-          value={formData.user_name}
-          onChange={(e) => setFormData({ ...formData, user_name: e.target.value })}
-          required
-          placeholder="Nom et prénom du client"
-        />
-      </div>
+      <FormField
+        type="input"
+        label="Nom du client"
+        fieldId="name"
+        value={formData.name}
+        onChange={(value) => handleInputChange('name', value)}
+        placeholder="Nom et prénom du client"
+        required
+        error={errors.name}
+      />
 
-      <div>
-        <Label>Note</Label>
-        <div className="flex gap-1 mt-2">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Note <span className="text-red-500">*</span>
+        </label>
+        <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -138,26 +113,23 @@ const ReviewForm = ({ review, onSuccess, onCancel }: ReviewFormProps) => {
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="comment">Commentaire</Label>
-        <Textarea
-          id="comment"
-          value={formData.comment}
-          onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
-          required
-          placeholder="Témoignage du client..."
-          rows={4}
-        />
-      </div>
+      <FormField
+        type="textarea"
+        label="Commentaire"
+        fieldId="comment"
+        value={formData.comment}
+        onChange={(value) => handleInputChange('comment', value)}
+        placeholder="Témoignage du client..."
+        required
+        rows={4}
+        error={errors.comment}
+      />
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Annuler
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Sauvegarde...' : (review ? 'Mettre à jour' : 'Ajouter')}
-        </Button>
-      </div>
+      <FormActions
+        loading={loading}
+        isEditing={!!review}
+        onCancel={onCancel}
+      />
     </form>
   );
 };
