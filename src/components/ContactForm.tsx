@@ -33,25 +33,27 @@ const ContactForm = () => {
         throw new Error("Trop de tentatives. Veuillez attendre avant de soumettre un nouveau message.");
       }
 
-      const sanitizedData = {
-        ...data,
+      // Prepare data with all required fields
+      const submitData = {
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
         phone: data.phone || null,
+        submitted_at: new Date().toISOString(),
+        ip_address: 'hidden',
+        user_agent: navigator.userAgent.substring(0, 500)
       };
 
       try {
         const { error } = await supabase
           .from('contact_submissions')
-          .insert([{
-            ...sanitizedData,
-            submitted_at: new Date().toISOString(),
-            ip_address: 'hidden',
-            user_agent: navigator.userAgent.substring(0, 500)
-          }]);
+          .insert([submitData]);
 
         if (error) throw error;
       } catch (dbError) {
         console.warn('Contact submissions table not available yet:', dbError);
-        console.log('Contact form submission:', sanitizedData);
+        console.log('Contact form submission:', submitData);
       }
     },
     successTitle: "Message envoyé !",

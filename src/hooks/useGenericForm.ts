@@ -28,20 +28,24 @@ export const useGenericForm = <T extends Record<string, any>>(
 
   const validateField = useCallback((field: keyof T, value: any) => {
     try {
-      const fieldSchema = config.validationSchema.pick({ [field]: true } as any);
-      fieldSchema.parse({ [field]: value });
+      // Validate the entire form data with the updated field
+      const testData = { ...formData, [field]: value };
+      config.validationSchema.parse(testData);
       setErrors(prev => ({ ...prev, [field as string]: '' }));
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setErrors(prev => ({ 
-          ...prev, 
-          [field as string]: error.errors[0]?.message || 'Erreur de validation' 
-        }));
+        const fieldError = error.errors.find(err => err.path.includes(field as string));
+        if (fieldError) {
+          setErrors(prev => ({ 
+            ...prev, 
+            [field as string]: fieldError.message || 'Erreur de validation' 
+          }));
+        }
       }
       return false;
     }
-  }, [config.validationSchema]);
+  }, [config.validationSchema, formData]);
 
   const handleInputChange = useCallback((field: keyof T, value: string) => {
     // Appliquer la sanitisation spécifique au champ
