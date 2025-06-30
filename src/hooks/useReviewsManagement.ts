@@ -6,7 +6,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 export interface Review {
   id: string;
-  name: string;
+  user_name: string;
   rating: number;
   comment: string;
   position?: string;
@@ -58,7 +58,7 @@ export const useReviewsManagement = () => {
 
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = !searchTerm || 
-      review.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.comment.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRating = filterRating === null || review.rating === filterRating;

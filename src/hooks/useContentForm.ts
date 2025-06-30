@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStandardToast } from '@/hooks/useStandardToast';
 import { useFormSubmission } from '@/hooks/useFormSubmission';
-import { contentSectionSchema, sanitizeText } from '@/utils/validationRules';
+import { contentSectionSchema } from '@/utils/validationRules';
+import { sanitizeText } from '@/utils/inputValidation';
 import { z } from 'zod';
 
 interface ContentSection {

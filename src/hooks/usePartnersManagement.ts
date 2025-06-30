@@ -6,10 +6,11 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 export interface Partner {
   id: string;
-  name: string;
+  partner_name: string;
   logo_url: string;
   website_url?: string;
   description?: string;
+  display_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -27,7 +28,7 @@ export const usePartnersManagement = () => {
       const { data, error } = await supabase
         .from('partners_logos')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('display_order', { ascending: true });
 
       if (error) throw error;
       setPartners(data || []);
@@ -56,7 +57,7 @@ export const usePartnersManagement = () => {
 
   const filteredPartners = partners.filter(partner =>
     !searchTerm || 
-    partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    partner.partner_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (partner.description && partner.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
