@@ -1,14 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStandardToast } from '@/hooks/useStandardToast';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import ContactInfoForm from './ContactInfo/ContactInfoForm';
 import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
+import ContactInfoForm from './ContactInfo/ContactInfoForm';
+import ContactHeader from './ContactInfo/ContactHeader';
+import ContactSearchFilter from './ContactInfo/ContactSearchFilter';
+import ContactList from './ContactInfo/ContactList';
 
 interface ContactInfo {
   id: string;
@@ -86,6 +84,16 @@ const ContactManagement = () => {
     setShowForm(false);
   };
 
+  const handleEdit = (contact: ContactInfo) => {
+    setEditingContact(contact);
+    setShowForm(true);
+  };
+
+  const handleAddContact = () => {
+    setEditingContact(null);
+    setShowForm(true);
+  };
+
   const filteredContacts = contacts.filter(contact => {
     const matchesSearch = 
       contact.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,18 +104,6 @@ const ContactManagement = () => {
     
     return matchesSearch && matchesFilter;
   });
-
-  const getTypeColor = (type: string) => {
-    const colors: { [key: string]: string } = {
-      'phone': 'bg-blue-100 text-blue-800',
-      'email': 'bg-green-100 text-green-800',
-      'address': 'bg-purple-100 text-purple-800',
-      'hours': 'bg-orange-100 text-orange-800',
-      'social': 'bg-pink-100 text-pink-800',
-      'zone': 'bg-yellow-100 text-yellow-800',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  };
 
   const uniqueTypes = [...new Set(contacts.map(c => c.type))];
 
@@ -138,98 +134,21 @@ const ContactManagement = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des contacts</h1>
-            <p className="text-gray-600">Gérez les informations de contact, horaires et zones d'intervention</p>
-          </div>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter un contact
-          </Button>
-        </div>
+      <ContactHeader onAddContact={handleAddContact} />
+      
+      <ContactSearchFilter
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterType={filterType}
+        onFilterChange={setFilterType}
+        uniqueTypes={uniqueTypes}
+      />
 
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Rechercher..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="all">Tous les types</option>
-            {uniqueTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        {filteredContacts.map((contact) => (
-          <Card key={contact.id}>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">
-                      {contact.label || contact.type}
-                    </CardTitle>
-                    <Badge className={getTypeColor(contact.type)}>
-                      {contact.type}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditingContact(contact);
-                      setShowForm(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Modifier
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(contact.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Supprimer
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm font-medium text-gray-700 mb-1">Valeur:</p>
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {contact.value}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredContacts.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Aucune information de contact trouvée</p>
-        </div>
-      )}
+      <ContactList
+        contacts={filteredContacts}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };
