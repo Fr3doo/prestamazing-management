@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { useStandardToast } from '@/hooks/useStandardToast';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import ContactInfoForm from './ContactInfoForm';
+import ContactInfoForm from './ContactInfo/ContactInfoForm';
 import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
 
 interface ContactInfo {
