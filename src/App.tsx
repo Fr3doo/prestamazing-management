@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,8 +19,35 @@ import AdminContacts from "./pages/AdminContacts";
 import AdminAdvanced from "./pages/AdminAdvanced";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
+import { useNavigationSetup } from "@/hooks/useNavigationSetup";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  useNavigationSetup();
+  
+  return (
+    <div className="min-h-screen">
+      <Toaster />
+      <Sonner />
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Layout><Index /></Layout>} />
+        <Route path="/services" element={<Layout><Services /></Layout>} />
+        <Route path="/about" element={<Layout><About /></Layout>} />
+        <Route path="/contact" element={<Layout><Contact /></Layout>} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/reviews" element={<AdminReviews />} />
+        <Route path="/admin/partners" element={<AdminPartners />} />
+        <Route path="/admin/content" element={<AdminContent />} />
+        <Route path="/admin/contacts" element={<AdminContacts />} />
+        <Route path="/admin/advanced" element={<AdminAdvanced />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
+  );
+};
 
 const App = () => (
   <BrowserRouter>
@@ -29,25 +55,7 @@ const App = () => (
       <ServiceProvider>
         <AuthProvider>
           <TooltipProvider>
-            <div className="min-h-screen">
-              <Toaster />
-              <Sonner />
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Layout><Index /></Layout>} />
-                <Route path="/services" element={<Layout><Services /></Layout>} />
-                <Route path="/about" element={<Layout><About /></Layout>} />
-                <Route path="/contact" element={<Layout><Contact /></Layout>} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/reviews" element={<AdminReviews />} />
-                <Route path="/admin/partners" element={<AdminPartners />} />
-                <Route path="/admin/content" element={<AdminContent />} />
-                <Route path="/admin/contacts" element={<AdminContacts />} />
-                <Route path="/admin/advanced" element={<AdminAdvanced />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
+            <AppContent />
           </TooltipProvider>
         </AuthProvider>
       </ServiceProvider>

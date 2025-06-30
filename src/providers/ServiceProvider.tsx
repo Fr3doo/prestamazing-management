@@ -4,8 +4,10 @@ import { IAuthService } from '@/interfaces/IAuthService';
 import { IAdminService } from '@/interfaces/IAdminService';
 import { ISecurityService } from '@/interfaces/ISecurityService';
 import { ISupabaseClient } from '@/interfaces/ISupabaseClient';
+import { INavigationService } from '@/interfaces/INavigationService';
 import { AuthService } from '@/services/AuthService';
 import { AdminService } from '@/services/AdminService';
+import { NavigationService } from '@/services/NavigationService';
 import { securityMonitor } from '@/utils/securityMonitoring';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -15,6 +17,7 @@ interface ServiceContextType {
   adminService: IAdminService;
   securityService: ISecurityService;
   supabaseClient: ISupabaseClient;
+  navigationService: INavigationService;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
@@ -44,6 +47,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ children }) =>
     adminService: AdminService,
     securityService: securityMonitor,
     supabaseClient,
+    navigationService: NavigationService,
   };
 
   return (

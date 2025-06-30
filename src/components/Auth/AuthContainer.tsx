@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthNavigation } from '@/hooks/useAuthNavigation';
+import { useEventSubscription } from '@/hooks/useEventBus';
 import { useToast } from '@/hooks/use-toast';
 import LoginForm from './LoginForm';
 import AccessDeniedCard from './AccessDeniedCard';
@@ -13,16 +13,29 @@ const AuthContainer = () => {
   // Gestion de la navigation via le hook dédié
   useAuthNavigation({ user, isAdmin, initialized });
 
+  // Écouter les événements d'authentification pour les notifications
+  useEventSubscription('auth:login-failed', (data) => {
+    toast({
+      title: "Erreur de connexion",
+      description: data.error,
+      variant: "destructive",
+    });
+  });
+
+  useEventSubscription('auth:logout', () => {
+    toast({
+      title: "Déconnexion réussie",
+      description: "Vous pouvez maintenant vous connecter avec un autre compte.",
+    });
+  });
+
   const handleSignIn = async (email: string, password: string) => {
     try {
       const { error } = await signIn(email, password);
       
       if (error) {
-        toast({
-          title: "Erreur de connexion",
-          description: error.message,
-          variant: "destructive",
-        });
+        // L'événement d'erreur sera émis par AuthService
+        console.log('Login error handled by event system');
       }
     } catch (error) {
       toast({
@@ -35,10 +48,7 @@ const AuthContainer = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    toast({
-      title: "Déconnexion réussie",
-      description: "Vous pouvez maintenant vous connecter avec un autre compte.",
-    });
+    // L'événement de déconnexion sera émis par AuthService
   };
 
   // Affichage du loading pendant l'initialisation
