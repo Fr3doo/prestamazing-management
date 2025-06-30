@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
@@ -9,11 +9,20 @@ import AnalyticsCharts from './Analytics/AnalyticsCharts';
 import AnalyticsReviewsTab from './Analytics/AnalyticsReviewsTab';
 import AnalyticsActivityTab from './Analytics/AnalyticsActivityTab';
 
-const Analytics = () => {
+const Analytics = memo(() => {
   const { data, loading } = useAnalyticsData();
 
+  const handleExport = useCallback(() => {
+    exportAnalyticsData();
+  }, []);
+
   if (loading) {
-    return <div className="p-6">Chargement des analytics...</div>;
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Chargement des analytics...</span>
+      </div>
+    );
   }
 
   if (!data) {
@@ -28,7 +37,7 @@ const Analytics = () => {
           <p className="text-gray-600">Vue d'ensemble détaillée de votre activité</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={exportAnalyticsData} variant="outline">
+          <Button onClick={handleExport} variant="outline">
             Exporter les données
           </Button>
         </div>
@@ -60,6 +69,8 @@ const Analytics = () => {
       </Tabs>
     </div>
   );
-};
+});
+
+Analytics.displayName = 'Analytics';
 
 export default Analytics;

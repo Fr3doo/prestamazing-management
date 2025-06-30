@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStandardToast } from '@/hooks/useStandardToast';
 import ContentForm from './ContentForm';
@@ -18,7 +18,7 @@ interface ContentSection {
   updated_at: string;
 }
 
-const ContentManagement = () => {
+const ContentManagement = memo(() => {
   const [sections, setSections] = useState<ContentSection[]>([]);
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -31,11 +31,7 @@ const ContentManagement = () => {
     fullScreen: false
   });
 
-  useEffect(() => {
-    fetchSections();
-  }, []);
-
-  const fetchSections = async () => {
+  const fetchSections = useCallback(async () => {
     startLoading();
     try {
       const { data, error } = await supabase
@@ -51,32 +47,38 @@ const ContentManagement = () => {
     } finally {
       stopLoading();
     }
-  };
+  }, [startLoading, stopLoading, showError]);
 
-  const handleFormSuccess = () => {
+  useEffect(() => {
+    fetchSections();
+  }, [fetchSections]);
+
+  const handleFormSuccess = useCallback(() => {
     setEditingSection(null);
     setShowForm(false);
     fetchSections();
-  };
+  }, [fetchSections]);
 
-  const handleFormCancel = () => {
+  const handleFormCancel = useCallback(() => {
     setEditingSection(null);
     setShowForm(false);
-  };
+  }, []);
 
-  const handleAddSection = () => {
+  const handleAddSection = useCallback(() => {
     setEditingSection(null);
     setShowForm(true);
-  };
+  }, []);
 
-  const handleEditSection = (section: ContentSection) => {
+  const handleEditSection = useCallback((section: ContentSection) => {
     setEditingSection(section);
     setShowForm(true);
-  };
+  }, []);
 
-  const filteredSections = sections.filter(section => 
-    section.section_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (section.title && section.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredSections = React.useMemo(() => 
+    sections.filter(section => 
+      section.section_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (section.title && section.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    ), [sections, searchTerm]
   );
 
   if (loading) {
@@ -113,6 +115,8 @@ const ContentManagement = () => {
       />
     </div>
   );
-};
+});
+
+ContentManagement.displayName = 'ContentManagement';
 
 export default ContentManagement;

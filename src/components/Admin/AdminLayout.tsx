@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -8,25 +8,29 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminLayout = memo(({ children }: AdminLayoutProps) => {
   const { signOut } = useAuth();
   const location = useLocation();
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { path: '/admin', label: 'Tableau de bord', exact: true },
     { path: '/admin/reviews', label: 'Avis clients' },
     { path: '/admin/partners', label: 'Partenaires' },
     { path: '/admin/content', label: 'Contenu' },
     { path: '/admin/contacts', label: 'Contacts' },
     { path: '/admin/advanced', label: 'Avancé' },
-  ];
+  ], []);
 
-  const isActiveRoute = (path: string, exact = false) => {
+  const isActiveRoute = useCallback((path: string, exact = false) => {
     if (exact) {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
-  };
+  }, [location.pathname]);
+
+  const handleSignOut = useCallback(() => {
+    signOut();
+  }, [signOut]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +57,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 ))}
               </nav>
             </div>
-            <Button onClick={signOut} variant="outline">
+            <Button onClick={handleSignOut} variant="outline">
               Déconnexion
             </Button>
           </div>
@@ -65,6 +69,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </main>
     </div>
   );
-};
+});
+
+AdminLayout.displayName = 'AdminLayout';
 
 export default AdminLayout;

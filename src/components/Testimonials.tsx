@@ -1,9 +1,9 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import TestimonialCarousel from './Testimonials/TestimonialCarousel';
 import { testimonials } from './Testimonials/testimonialData';
 
-const Testimonials = () => {
+const Testimonials = memo(() => {
   const testimonialRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +43,8 @@ const Testimonials = () => {
       <TestimonialCarousel testimonials={testimonials} />
     </section>
   );
-};
+});
+
+Testimonials.displayName = 'Testimonials';
 
 export default Testimonials;
