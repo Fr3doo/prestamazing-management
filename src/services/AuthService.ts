@@ -2,13 +2,10 @@
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { securityMonitor } from '@/utils/securityMonitoring';
+import { IAuthService, SignInResult, SessionResult } from '@/interfaces/IAuthService';
 
-interface SignInResult {
-  error: any;
-}
-
-export class AuthService {
-  static async signIn(email: string, password: string): Promise<SignInResult> {
+export class AuthServiceImpl implements IAuthService {
+  async signIn(email: string, password: string): Promise<SignInResult> {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -27,16 +24,16 @@ export class AuthService {
     }
   }
 
-  static async signOut(): Promise<void> {
+  async signOut(): Promise<void> {
     await supabase.auth.signOut();
   }
 
-  static async getSession(): Promise<{ session: Session | null }> {
+  async getSession(): Promise<SessionResult> {
     const { data: { session } } = await supabase.auth.getSession();
     return { session };
   }
 
-  static setupAuthStateListener(
+  setupAuthStateListener(
     callback: (event: string, session: Session | null) => void
   ) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
@@ -57,3 +54,6 @@ export class AuthService {
     });
   }
 }
+
+// Singleton instance pour compatibilité avec le code existant
+export const AuthService = new AuthServiceImpl();

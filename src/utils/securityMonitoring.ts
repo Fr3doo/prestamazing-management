@@ -1,24 +1,16 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { ISecurityService, SecurityEvent } from '@/interfaces/ISecurityService';
 
-export interface SecurityEvent {
-  event_type: 'login_success' | 'login_failed' | 'admin_action' | 'suspicious_activity' | 'form_submission' | 'admin_check';
-  user_id?: string;
-  ip_address?: string;
-  user_agent?: string;
-  details: Record<string, any>;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export class SecurityMonitor {
-  private static instance: SecurityMonitor;
+export class SecurityMonitorImpl implements ISecurityService {
+  private static instance: SecurityMonitorImpl;
   private events: SecurityEvent[] = [];
 
-  static getInstance(): SecurityMonitor {
-    if (!SecurityMonitor.instance) {
-      SecurityMonitor.instance = new SecurityMonitor();
+  static getInstance(): SecurityMonitorImpl {
+    if (!SecurityMonitorImpl.instance) {
+      SecurityMonitorImpl.instance = new SecurityMonitorImpl();
     }
-    return SecurityMonitor.instance;
+    return SecurityMonitorImpl.instance;
   }
 
   async logEvent(event: SecurityEvent): Promise<void> {
@@ -128,4 +120,4 @@ export class SecurityMonitor {
   }
 }
 
-export const securityMonitor = SecurityMonitor.getInstance();
+export const securityMonitor = SecurityMonitorImpl.getInstance();
