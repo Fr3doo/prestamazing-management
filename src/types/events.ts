@@ -6,9 +6,4 @@ export interface AuthEvents {
   'auth:admin-check-complete': { userId: string; isAdmin: boolean };
 }
 
-export interface NavigationEvents {
-  'navigation:redirect-to-admin': void;
-  'navigation:redirect-to-auth': void;
-}
-
-export type AppEvents = AuthEvents & NavigationEvents;
+export type AppEvents = AuthEvents;

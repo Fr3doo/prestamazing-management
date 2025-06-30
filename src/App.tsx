@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,13 +20,10 @@ import AdminContacts from "./pages/AdminContacts";
 import AdminAdvanced from "./pages/AdminAdvanced";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
-import { useNavigationSetup } from "@/hooks/useNavigationSetup";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  useNavigationSetup();
-  
   return (
     <div className="min-h-screen">
       <Toaster />

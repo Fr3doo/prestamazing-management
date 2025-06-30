@@ -29,7 +29,8 @@ export const useAuthContainer = (): UseAuthContainerReturn => {
       const { error } = await signIn(email, password);
       
       if (error) {
-        console.log('Login error handled by event system');
+        console.error('Login error:', error);
+        // Plus besoin d'événements, l'erreur sera gérée par le toast dans AuthEventHandler
       }
     } catch (error) {
       console.error('Unexpected sign in error:', error);
@@ -39,6 +40,8 @@ export const useAuthContainer = (): UseAuthContainerReturn => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      // Navigation directe après déconnexion
+      navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Sign out error:', error);
     }

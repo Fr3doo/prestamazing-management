@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 const AuthEventHandler = () => {
   const { toast } = useToast();
 
-  // Écouter les événements d'authentification pour les notifications
+  // Écouter uniquement les événements de notification
   useEventSubscription('auth:login-failed', (data) => {
     toast({
       title: "Erreur de connexion",
@@ -22,7 +22,7 @@ const AuthEventHandler = () => {
     });
   });
 
-  return null; // Ce composant ne rend rien, il gère uniquement les événements
+  return null;
 };
 
 export default AuthEventHandler;
