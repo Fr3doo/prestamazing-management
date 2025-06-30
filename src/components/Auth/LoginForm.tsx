@@ -12,7 +12,7 @@ const LoginForm = ({ onSubmit, loading }: LoginFormProps) => {
   const { LoadingComponent } = useLoadingSpinner({
     initialLoading: loading,
     spinnerText: "Connexion en cours...",
-    size: "md"
+    spinnerSize: "md"
   });
 
   if (loading) {
