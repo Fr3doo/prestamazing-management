@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useFormSubmission } from '@/hooks/useFormSubmission';
 import { contentSectionSchema, sanitizeText } from '@/utils/inputValidation';
 import { z } from 'zod';
 
@@ -32,9 +33,9 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
     content: '',
     image_url: '',
   });
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const { loading, submitForm } = useFormSubmission();
 
   useEffect(() => {
     if (section) {
@@ -82,10 +83,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
       return;
     }
 
-    setLoading(true);
-    setErrors({});
-
-    try {
+    const submitOperation = async () => {
       // Validate all fields
       const validatedData = contentSectionSchema.parse(formData);
       
@@ -131,38 +129,35 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
         });
       }
 
-      onSuccess();
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach(err => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(newErrors);
-        
-        toast({
-          title: "Erreur de validation",
-          description: "Veuillez corriger les erreurs dans le formulaire.",
-          variant: "destructive",
-        });
-      } else {
-        console.warn('Content form error:', {
-          section_key: formData.section_key,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        
-        toast({
-          title: "Erreur",
-          description: "Impossible de sauvegarder la section",
-          variant: "destructive",
-        });
+      return sanitizedData;
+    };
+
+    const result = await submitForm(submitOperation, {
+      onSuccess: () => onSuccess(),
+      errorContext: 'Content form submission'
+    });
+
+    // Handle validation errors specifically
+    if (!result) {
+      try {
+        contentSectionSchema.parse(formData);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          const newErrors: Record<string, string> = {};
+          error.errors.forEach(err => {
+            if (err.path[0]) {
+              newErrors[err.path[0] as string] = err.message;
+            }
+          });
+          setErrors(newErrors);
+          
+          toast({
+            title: "Erreur de validation",
+            description: "Veuillez corriger les erreurs dans le formulaire.",
+            variant: "destructive",
+          });
+        }
       }
-    } finally {
-      setLoading(false);
     }
   };
 

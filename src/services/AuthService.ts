@@ -16,6 +16,7 @@ export class AuthServiceImpl implements IAuthService {
       if (error) {
         await securityMonitor.logLoginAttempt(false, email, error.message);
         eventBus.emit('auth:login-failed', { error: error.message });
+        console.warn('Login attempt failed:', { email: this.maskEmail(email), error: error.message });
       }
       
       return { error };
@@ -23,20 +24,32 @@ export class AuthServiceImpl implements IAuthService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await securityMonitor.logLoginAttempt(false, email, errorMessage);
       eventBus.emit('auth:login-failed', { error: errorMessage });
+      console.error('Login error:', { email: this.maskEmail(email), error: errorMessage });
       return { error };
     }
   }
 
   async signOut(): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.auth.signOut();
-    await securityMonitor.logLogout(user?.id);
-    eventBus.emit('auth:logout');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.auth.signOut();
+      await securityMonitor.logLogout(user?.id);
+      eventBus.emit('auth:logout', undefined);
+      console.log('User signed out successfully');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
   }
 
   async getSession(): Promise<SessionResult> {
-    const { data: { session } } = await supabase.auth.getSession();
-    return { session };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return { session };
+    } catch (error) {
+      console.error('Get session error:', error);
+      return { session: null };
+    }
   }
 
   setupAuthStateListener(
@@ -45,18 +58,30 @@ export class AuthServiceImpl implements IAuthService {
     return supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id);
       
-      // Log authentication events et émettre des événements
-      if (event === 'SIGNED_IN' && session?.user) {
-        await securityMonitor.logLoginAttempt(true, session.user.email);
-        // Note: isAdmin sera déterminé plus tard par useAdminCheck
-        eventBus.emit('auth:login-success', { userId: session.user.id, isAdmin: false });
-      } else if (event === 'SIGNED_OUT') {
-        await securityMonitor.logLogout(session?.user?.id);
-        eventBus.emit('auth:logout');
+      try {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await securityMonitor.logLoginAttempt(true, session.user.email);
+          eventBus.emit('auth:login-success', { userId: session.user.id, isAdmin: false });
+        } else if (event === 'SIGNED_OUT') {
+          await securityMonitor.logLogout(session?.user?.id);
+          eventBus.emit('auth:logout', undefined);
+        }
+      } catch (error) {
+        console.error('Auth state listener error:', error);
       }
       
       callback(event, session);
     });
+  }
+
+  private maskEmail(email?: string): string {
+    if (!email) return 'unknown';
+    const parts = email.split('@');
+    if (parts.length === 2) {
+      const username = parts[0].length > 2 ? parts[0].substring(0, 2) + '***' : '***';
+      return `${username}@${parts[1]}`;
+    }
+    return '***@***';
   }
 }
 
