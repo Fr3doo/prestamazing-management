@@ -1,45 +1,62 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from './useErrorHandler';
 
-export interface FormSubmissionOptions<T> {
-  onSuccess?: (data: T) => void;
+export interface FormSubmissionOptions {
+  successTitle?: string;
   successMessage?: string;
+  errorTitle?: string;
   errorContext?: string;
+  onSuccess?: () => void;
+  onError?: (error: unknown) => void;
 }
 
-export const useFormSubmission = <T = any>() => {
+export const useFormSubmission = () => {
   const [loading, setLoading] = useState(false);
-  const { handleAsyncError } = useErrorHandler();
+  const { toast } = useToast();
+  const { handleError } = useErrorHandler();
 
-  const submitForm = async (
+  const submitForm = useCallback(async <T>(
     submitFunction: () => Promise<T>,
-    options: FormSubmissionOptions<T> = {}
-  ) => {
+    options: FormSubmissionOptions = {}
+  ): Promise<T | null> => {
     const {
+      successTitle = "Succès",
+      successMessage = "Opération réussie",
+      errorTitle = "Erreur",
+      errorContext = "Form submission",
       onSuccess,
-      successMessage,
-      errorContext = 'Form submission'
+      onError
     } = options;
 
     setLoading(true);
-    
-    const result = await handleAsyncError(
-      submitFunction,
-      {
-        title: "Erreur de formulaire",
+
+    try {
+      const result = await submitFunction();
+      
+      toast({
+        title: successTitle,
+        description: successMessage,
+      });
+
+      onSuccess?.();
+      return result;
+    } catch (error) {
+      handleError(error, {
+        title: errorTitle,
         logContext: errorContext
-      }
-    );
-
-    setLoading(false);
-
-    if (result && onSuccess) {
-      onSuccess(result);
+      });
+      
+      onError?.(error);
+      return null;
+    } finally {
+      setLoading(false);
     }
+  }, [toast, handleError]);
 
-    return result;
+  return {
+    loading,
+    submitForm
   };
-
-  return { loading, submitForm };
 };

@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   contactFormSchema, 
@@ -12,6 +11,8 @@ import {
   contactFormRateLimit 
 } from '@/utils/inputValidation';
 import { z } from 'zod';
+import { useFormSubmission } from '@/hooks/useFormSubmission';
+import { useToast } from '@/hooks/use-toast';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -21,9 +22,9 @@ const ContactForm = () => {
     subject: '',
     message: ''
   });
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const { loading, submitForm } = useFormSubmission();
 
   const validateField = (field: string, value: string) => {
     try {
@@ -64,81 +65,76 @@ const ContactForm = () => {
       return;
     }
 
-    setLoading(true);
     setErrors({});
 
-    try {
-      // Validate all fields
-      const validatedData = contactFormSchema.parse(formData);
-      
-      // Additional sanitization before submission
-      const sanitizedData = {
-        name: sanitizeText(validatedData.name),
-        email: sanitizeEmail(validatedData.email),
-        phone: validatedData.phone ? sanitizeText(validatedData.phone) : null,
-        subject: sanitizeText(validatedData.subject),
-        message: sanitizeText(validatedData.message)
-      };
-
-      // Try to submit to the contact_submissions table, but handle gracefully if it doesn't exist
-      try {
-        const { error } = await supabase
-          .from('contact_submissions')
-          .insert([{
-            ...sanitizedData,
-            submitted_at: new Date().toISOString(),
-            ip_address: 'hidden', // In production, log IP for security
-            user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
-          }]);
-
-        if (error) throw error;
-      } catch (dbError) {
-        console.warn('Contact submissions table not available yet:', dbError);
-        // For now, just log the form data to console since the table doesn't exist
-        console.log('Contact form submission:', sanitizedData);
-      }
-
-      toast({
-        title: "Message envoyé !",
-        description: "Nous vous répondrons dans les plus brefs délais.",
-      });
-
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi:', error);
-      
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach(err => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(newErrors);
+    const result = await submitForm(
+      async () => {
+        // Validate all fields
+        const validatedData = contactFormSchema.parse(formData);
         
-        toast({
-          title: "Erreur de validation",
-          description: "Veuillez corriger les erreurs dans le formulaire.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible d'envoyer le message. Veuillez réessayer.",
-          variant: "destructive",
-        });
+        // Additional sanitization before submission
+        const sanitizedData = {
+          name: sanitizeText(validatedData.name),
+          email: sanitizeEmail(validatedData.email),
+          phone: validatedData.phone ? sanitizeText(validatedData.phone) : null,
+          subject: sanitizeText(validatedData.subject),
+          message: sanitizeText(validatedData.message)
+        };
+
+        // Try to submit to the contact_submissions table, but handle gracefully if it doesn't exist
+        try {
+          const { error } = await supabase
+            .from('contact_submissions')
+            .insert([{
+              ...sanitizedData,
+              submitted_at: new Date().toISOString(),
+              ip_address: 'hidden', // In production, log IP for security
+              user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
+            }]);
+
+          if (error) throw error;
+        } catch (dbError) {
+          console.warn('Contact submissions table not available yet:', dbError);
+          // For now, just log the form data to console since the table doesn't exist
+          console.log('Contact form submission:', sanitizedData);
+        }
+
+        return sanitizedData;
+      },
+      {
+        successTitle: "Message envoyé !",
+        successMessage: "Nous vous répondrons dans les plus brefs délais.",
+        errorTitle: "Erreur",
+        errorContext: "Contact form submission",
+        onSuccess: () => {
+          // Reset form on success
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            subject: '',
+            message: ''
+          });
+        },
+        onError: (error) => {
+          if (error instanceof z.ZodError) {
+            const newErrors: Record<string, string> = {};
+            error.errors.forEach(err => {
+              if (err.path[0]) {
+                newErrors[err.path[0] as string] = err.message;
+              }
+            });
+            setErrors(newErrors);
+            
+            toast({
+              title: "Erreur de validation",
+              description: "Veuillez corriger les erreurs dans le formulaire.",
+              variant: "destructive",
+            });
+          }
+        }
       }
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   return (
