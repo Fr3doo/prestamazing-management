@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthNavigation } from '@/hooks/useAuthNavigation';
-import { useEventSubscription } from '@/hooks/useEventBus';
 import { useToast } from '@/hooks/use-toast';
-import LoginForm from './LoginForm';
-import AccessDeniedCard from './AccessDeniedCard';
+import AuthEventHandler from './AuthEventHandler';
+import AuthLoadingScreen from './AuthLoadingScreen';
+import AuthStateManager from './AuthStateManager';
 
 const AuthContainer = () => {
   const { signIn, signOut, user, isAdmin, initialized, loading } = useAuth();
@@ -12,22 +13,6 @@ const AuthContainer = () => {
 
   // Gestion de la navigation via le hook dédié
   useAuthNavigation({ user, isAdmin, initialized });
-
-  // Écouter les événements d'authentification pour les notifications
-  useEventSubscription('auth:login-failed', (data) => {
-    toast({
-      title: "Erreur de connexion",
-      description: data.error,
-      variant: "destructive",
-    });
-  });
-
-  useEventSubscription('auth:logout', () => {
-    toast({
-      title: "Déconnexion réussie",
-      description: "Vous pouvez maintenant vous connecter avec un autre compte.",
-    });
-  });
 
   const handleSignIn = async (email: string, password: string) => {
     try {
@@ -53,28 +38,21 @@ const AuthContainer = () => {
 
   // Affichage du loading pendant l'initialisation
   if (!initialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-gray-600">Chargement...</p>
-        </div>
-      </div>
-    );
+    return <AuthLoadingScreen />;
   }
 
-  // Utilisateur connecté mais pas admin
-  if (user && !isAdmin) {
-    return (
-      <AccessDeniedCard 
-        userEmail={user.email || 'utilisateur'} 
-        onSignOut={handleSignOut} 
+  return (
+    <>
+      <AuthEventHandler />
+      <AuthStateManager
+        user={user}
+        isAdmin={isAdmin}
+        loading={loading}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
       />
-    );
-  }
-
-  // Utilisateur non connecté
-  return <LoginForm onSubmit={handleSignIn} loading={loading} />;
+    </>
+  );
 };
 
 export default AuthContainer;
