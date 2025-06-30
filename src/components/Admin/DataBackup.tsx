@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { useRepositories } from '@/hooks/useRepositories';
 import { Download, Upload, Database, Calendar, FileText, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,6 +40,12 @@ const DataBackup = () => {
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
   const { toast } = useToast();
+  const {
+    reviewRepository,
+    contactRepository,
+    contentRepository,
+    partnerRepository
+  } = useRepositories();
 
   const createBackup = async () => {
     setIsCreatingBackup(true);
@@ -51,34 +57,22 @@ const DataBackup = () => {
       
       // Reviews
       setBackupProgress(25);
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('reviews')
-        .select('*');
-      if (reviewsError) throw reviewsError;
+      const reviewsData = await reviewRepository.getAllReviews();
       data.reviews = reviewsData;
       
       // Contact info
       setBackupProgress(50);
-      const { data: contactData, error: contactError } = await supabase
-        .from('contact_info')
-        .select('*');
-      if (contactError) throw contactError;
+      const contactData = await contactRepository.getAllContactInfo();
       data.contact_info = contactData;
       
       // Content sections
       setBackupProgress(75);
-      const { data: contentData, error: contentError } = await supabase
-        .from('content_sections')
-        .select('*');
-      if (contentError) throw contentError;
+      const contentData = await contentRepository.getAllContentSections();
       data.content_sections = contentData;
       
       // Partners logos
       setBackupProgress(100);
-      const { data: partnersData, error: partnersError } = await supabase
-        .from('partners_logos')
-        .select('*');
-      if (partnersError) throw partnersError;
+      const partnersData = await partnerRepository.getAllPartners();
       data.partners_logos = partnersData;
       
       // Création du fichier de sauvegarde
@@ -168,38 +162,22 @@ const DataBackup = () => {
   const exportTable = async (tableName: 'reviews' | 'contact_info' | 'content_sections' | 'partners_logos') => {
     try {
       let data: any[] = [];
-      
+
       switch (tableName) {
         case 'reviews':
-          const { data: reviewsData, error: reviewsError } = await supabase
-            .from('reviews')
-            .select('*');
-          if (reviewsError) throw reviewsError;
-          data = reviewsData || [];
+          data = await reviewRepository.getAllReviews();
           break;
-          
+
         case 'contact_info':
-          const { data: contactData, error: contactError } = await supabase
-            .from('contact_info')
-            .select('*');
-          if (contactError) throw contactError;
-          data = contactData || [];
+          data = await contactRepository.getAllContactInfo();
           break;
-          
+
         case 'content_sections':
-          const { data: contentData, error: contentError } = await supabase
-            .from('content_sections')
-            .select('*');
-          if (contentError) throw contentError;
-          data = contentData || [];
+          data = await contentRepository.getAllContentSections();
           break;
-          
+
         case 'partners_logos':
-          const { data: partnersData, error: partnersError } = await supabase
-            .from('partners_logos')
-            .select('*');
-          if (partnersError) throw partnersError;
-          data = partnersData || [];
+          data = await partnerRepository.getAllPartners();
           break;
       }
       

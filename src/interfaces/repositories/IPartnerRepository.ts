@@ -31,4 +31,5 @@ export interface IPartnerRepository {
   updatePartner(id: string, data: UpdatePartnerData): Promise<Partner>;
   deletePartner(id: string): Promise<void>;
   updatePartnerOrder(partnerId: string, newOrder: number): Promise<void>;
+  getMaxDisplayOrder(): Promise<number>;
 }
