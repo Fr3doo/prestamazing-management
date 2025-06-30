@@ -1,6 +1,6 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ServiceProvider } from '@/providers/ServiceProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -32,4 +32,5 @@ const customRender = (
 
 // Re-export everything from @testing-library/react
 export * from '@testing-library/react';
-export { customRender as render };
+// Explicitly export the commonly used utilities
+export { customRender as render, screen, fireEvent };
