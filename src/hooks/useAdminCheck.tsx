@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { AdminService } from '@/services/AdminService';
+import { useLoadingState } from './useLoadingState';
 
 export interface UseAdminCheckReturn {
   isAdmin: boolean;
@@ -11,7 +12,7 @@ export interface UseAdminCheckReturn {
 
 export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { loading, startLoading, stopLoading } = useLoadingState();
 
   const checkAdminStatus = async (userId: string) => {
     return await AdminService.checkAdminStatus(userId);
@@ -21,7 +22,7 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
     let isMounted = true;
 
     if (user) {
-      setLoading(true);
+      startLoading();
       checkAdminStatus(user.id)
         .then(async (adminStatus) => {
           console.log('Admin status for user:', user.id, adminStatus);
@@ -41,18 +42,18 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
         })
         .finally(() => {
           if (isMounted) {
-            setLoading(false);
+            stopLoading();
           }
         });
     } else {
       setIsAdmin(false);
-      setLoading(false);
+      stopLoading();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [user?.id]);
+  }, [user?.id, startLoading, stopLoading]);
 
   return {
     isAdmin,

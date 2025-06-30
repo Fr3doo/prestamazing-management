@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 interface ProtectionConfig {
   requireAuth?: boolean;
@@ -10,14 +11,12 @@ interface ProtectionConfig {
   loadingComponent?: React.ComponentType;
 }
 
-interface WithProtectionProps {
-  children: React.ReactNode;
-}
-
 const DefaultLoadingComponent = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="text-lg">Chargement...</div>
-  </div>
+  <LoadingSpinner 
+    text="Vérification des autorisations..."
+    size="md"
+    fullScreen={true}
+  />
 );
 
 const withProtection = <P extends object>(
