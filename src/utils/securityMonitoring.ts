@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SecurityEvent {
-  event_type: 'login_success' | 'login_failed' | 'admin_action' | 'suspicious_activity' | 'form_submission';
+  event_type: 'login_success' | 'login_failed' | 'admin_action' | 'suspicious_activity' | 'form_submission' | 'admin_check';
   user_id?: string;
   ip_address?: string;
   user_agent?: string;
