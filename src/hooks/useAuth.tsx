@@ -5,46 +5,37 @@ import { useServices } from '@/providers/ServiceProvider';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';
 import { useAdminCheck } from './useAdminCheck';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  isAdmin: boolean;
-  loading: boolean;
-  initialized: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
-}
+import { AuthContextType } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const services = useServices();
   
-  // Utilisation des hooks séparés avec injection de services
+  // Use separated concerns with dependency injection
   const { user, session, initialized } = useAuthState(services.authService);
   const { signIn, signOut } = useAuthActions(services.authService);
   const { isAdmin, loading: adminLoading } = useAdminCheck(user, services.adminService);
 
-  // Combine auth loading with admin loading for backward compatibility
-  const loading = adminLoading;
+  // Simplified context value using the new AuthContextType
+  const contextValue: AuthContextType = {
+    user,
+    session,
+    initialized,
+    isAdmin,
+    loading: adminLoading,
+    signIn,
+    signOut,
+  };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      isAdmin,
-      loading,
-      initialized,
-      signIn,
-      signOut,
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');

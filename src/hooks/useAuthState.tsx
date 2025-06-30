@@ -1,15 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { IAuthService } from '@/interfaces/IAuthService';
+import { AuthService } from '@/types/services';
+import { AuthState } from '@/types/auth';
 
-export interface UseAuthStateReturn {
-  user: User | null;
-  session: Session | null;
-  initialized: boolean;
-}
-
-export const useAuthState = (authService: IAuthService): UseAuthStateReturn => {
+export const useAuthState = (authService: AuthService): AuthState => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [initialized, setInitialized] = useState(false);

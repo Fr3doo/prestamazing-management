@@ -1,19 +1,11 @@
 
-import { User, Session } from '@supabase/supabase-js';
+import { AuthService } from '@/types/services';
 
-export interface SignInResult {
-  error: any;
-}
+/**
+ * @deprecated Use AuthService from @/types/services instead
+ * This interface is kept for backward compatibility
+ */
+export interface IAuthService extends AuthService {}
 
-export interface SessionResult {
-  session: Session | null;
-}
-
-export interface IAuthService {
-  signIn(email: string, password: string): Promise<SignInResult>;
-  signOut(): Promise<void>;
-  getSession(): Promise<SessionResult>;
-  setupAuthStateListener(
-    callback: (event: string, session: Session | null) => void
-  ): { data: { subscription: { unsubscribe: () => void } } };
-}
+// Re-export types for backward compatibility
+export type { SignInResult, SessionResult } from '@/types/auth';

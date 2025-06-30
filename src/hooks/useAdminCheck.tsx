@@ -1,16 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { IAdminService } from '@/interfaces/IAdminService';
+import { AdminService } from '@/types/admin';
 import { useLoadingState } from './useLoadingState';
+import { AdminCheckResult } from '@/types/admin';
 
-export interface UseAdminCheckReturn {
-  isAdmin: boolean;
-  loading: boolean;
-  checkAdminStatus: (userId: string) => Promise<boolean>;
-}
-
-export const useAdminCheck = (user: User | null, adminService: IAdminService): UseAdminCheckReturn => {
+export const useAdminCheck = (user: User | null, adminService: AdminService): AdminCheckResult => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { loading, startLoading, stopLoading } = useLoadingState();
 

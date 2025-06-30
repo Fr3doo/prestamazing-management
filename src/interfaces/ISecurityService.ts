@@ -1,13 +1,11 @@
 
-export interface SecurityEvent {
-  event_type: 'login_success' | 'login_failed' | 'logout';
-  user_id?: string;
-  details: Record<string, any>;
-  timestamp: string;
-}
+import { SecurityService, SecurityEvent } from '@/types/services';
 
-export interface ISecurityService {
-  logLoginAttempt(success: boolean, email?: string, error?: string): Promise<void>;
-  logLogout(userId?: string): Promise<void>;
-  getRecentEvents(limit?: number): SecurityEvent[];
-}
+/**
+ * @deprecated Use SecurityService from @/types/services instead
+ * This interface is kept for backward compatibility
+ */
+export interface ISecurityService extends SecurityService {}
+
+// Re-export for backward compatibility
+export type { SecurityEvent } from '@/types/services';
