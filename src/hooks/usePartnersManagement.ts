@@ -5,6 +5,8 @@ import { useStandardToast } from './useStandardToast';
 import { useErrorHandler } from './useErrorHandler';
 import { Partner } from '@/interfaces/repositories/IPartnerRepository';
 
+export { Partner } from '@/interfaces/repositories/IPartnerRepository';
+
 export const usePartnersManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);

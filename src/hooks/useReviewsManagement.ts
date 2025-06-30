@@ -3,15 +3,9 @@ import { useState, useCallback, useMemo } from 'react';
 import { useReviews } from './useReviews';
 import { useStandardToast } from './useStandardToast';
 import { useErrorHandler } from './useErrorHandler';
+import { Review } from '@/interfaces/repositories/IReviewRepository';
 
-export interface Review {
-  id: string;
-  user_name: string;
-  rating: number;
-  comment: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export { Review } from '@/interfaces/repositories/IReviewRepository';
 
 export const useReviewsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');

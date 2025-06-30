@@ -12,4 +12,5 @@ export { useContentManagement } from '../useContentManagement';
 export { useContactManagement } from '../useContactManagement';
 
 // Types re-exports for convenience
-export type { Review } from '../useReviewsManagement';
+export { Review } from '../useReviewsManagement';
+export { Partner } from '../usePartnersManagement';
