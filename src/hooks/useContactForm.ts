@@ -53,8 +53,7 @@ export const useContactForm = () => {
     // Rate limiting check
     const clientIP = 'user-session';
     if (!contactFormRateLimit.isAllowed(clientIP)) {
-      const remainingTime = Math.ceil(contactFormRateLimit.getRemainingTime(clientIP) / 1000 / 60);
-      showError("Trop de tentatives", `Veuillez attendre ${remainingTime} minutes avant de soumettre un nouveau message.`);
+      showError("Trop de tentatives", "Veuillez attendre avant de soumettre un nouveau message.");
       return;
     }
 
