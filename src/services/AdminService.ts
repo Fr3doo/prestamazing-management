@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { securityMonitor } from '@/utils/securityMonitoring';
 import { IAdminService } from '@/interfaces/IAdminService';
 
 export class AdminServiceImpl implements IAdminService {
@@ -17,7 +16,7 @@ export class AdminServiceImpl implements IAdminService {
       return !!data && !error;
     } catch (error) {
       console.error('Error checking admin status:', error);
-      await securityMonitor.logSuspiciousActivity('admin_check_failed', {
+      console.warn('Admin check failed:', {
         user_id: userId,
         error: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -27,13 +26,9 @@ export class AdminServiceImpl implements IAdminService {
 
   async logAdminAccess(userId: string, adminStatus: boolean): Promise<void> {
     try {
-      await securityMonitor.logEvent({
-        event_type: 'admin_check',
-        details: { 
-          user_id: userId,
-          admin_status: adminStatus 
-        },
-        severity: 'low'
+      console.log('Admin access logged:', { 
+        user_id: userId,
+        admin_status: adminStatus 
       });
     } catch (error) {
       console.error('Error logging admin access:', error);

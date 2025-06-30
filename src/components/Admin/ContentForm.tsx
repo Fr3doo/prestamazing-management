@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { contentSectionSchema, sanitizeText } from '@/utils/inputValidation';
-import { securityMonitor } from '@/utils/securityMonitoring';
 import { z } from 'zod';
 
 interface ContentSection {
@@ -110,10 +109,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
 
         if (error) throw error;
 
-        await securityMonitor.logAdminAction('UPDATE', 'content_section', {
-          section_id: section.id,
-          section_key: sanitizedData.section_key
-        });
+        console.log('Content section updated:', sanitizedData.section_key);
 
         toast({
           title: "Succès",
@@ -127,9 +123,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
 
         if (error) throw error;
 
-        await securityMonitor.logAdminAction('CREATE', 'content_section', {
-          section_key: sanitizedData.section_key
-        });
+        console.log('Content section created:', sanitizedData.section_key);
 
         toast({
           title: "Succès",
@@ -156,7 +150,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
           variant: "destructive",
         });
       } else {
-        await securityMonitor.logSuspiciousActivity('content_form_error', {
+        console.warn('Content form error:', {
           section_key: formData.section_key,
           error: error instanceof Error ? error.message : 'Unknown error'
         });

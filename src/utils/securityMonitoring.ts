@@ -49,7 +49,11 @@ export class SecurityMonitorImpl implements ISecurityService {
       // Try to persist to database (gracefully handle if table doesn't exist)
       try {
         await supabase.from('security_events').insert([{
-          ...event,
+          event_type: event.event_type,
+          user_id: event.user_id,
+          details: event.details,
+          timestamp: event.timestamp,
+          severity: 'low', // Default severity for all events
           session_id: this.getSessionId(),
           ip_address: 'unknown',
           user_agent: navigator.userAgent.substring(0, 500)
