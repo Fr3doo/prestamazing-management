@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStandardToast } from '@/hooks/useStandardToast';
+import { useFormFields } from '@/hooks/useFormFields';
 
 interface ContactInfo {
   id: string;
@@ -23,7 +24,11 @@ interface ContactInfoFormProps {
 }
 
 const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps) => {
-  const [formData, setFormData] = useState({
+  const {
+    fields: formData,
+    setField,
+    setFields,
+  } = useFormFields({
     type: '',
     value: '',
     label: '',
@@ -45,13 +50,13 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
 
   useEffect(() => {
     if (contact) {
-      setFormData({
+      setFields({
         type: contact.type,
         value: contact.value,
         label: contact.label || '',
       });
     }
-  }, [contact]);
+  }, [contact, setFields]);
 
   const { contactRepository } = useRepositories();
 
@@ -95,7 +100,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
         <Label htmlFor="type">Type de contact *</Label>
-        <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+        <Select value={formData.type} onValueChange={(value) => setField('type', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Sélectionnez un type" />
           </SelectTrigger>
@@ -114,7 +119,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
         <Input
           id="label"
           value={formData.label}
-          onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+          onChange={(e) => setField('label', e.target.value)}
           placeholder="ex: Téléphone principal, Email support..."
         />
         <p className="text-xs text-gray-500 mt-1">
@@ -128,7 +133,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
           <Textarea
             id="value"
             value={formData.value}
-            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+            onChange={(e) => setField('value', e.target.value)}
             placeholder={
               formData.type === 'hours' 
                 ? "Lundi - Vendredi: 9h00 - 19h00\nSamedi: Sur rendez-vous"
@@ -143,7 +148,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
           <Input
             id="value"
             value={formData.value}
-            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+            onChange={(e) => setField('value', e.target.value)}
             placeholder={
               formData.type === 'phone' || formData.type === 'whatsapp'
                 ? "+33 6 00 00 00 00"

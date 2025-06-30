@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X, ExternalLink } from 'lucide-react';
+import { useFormFields } from '@/hooks/useFormFields';
 
 interface Partner {
   id: string;
@@ -26,7 +27,11 @@ interface PartnerFormProps {
 }
 
 const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
-  const [formData, setFormData] = useState({
+  const {
+    fields: formData,
+    setField,
+    setFields,
+  } = useFormFields({
     partner_name: '',
     website_url: '',
   });
@@ -40,13 +45,13 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
 
   useEffect(() => {
     if (partner) {
-      setFormData({
+      setFields({
         partner_name: partner.partner_name,
         website_url: partner.website_url || '',
       });
       setLogoPreview(partner.logo_url);
     }
-  }, [partner]);
+  }, [partner, setFields]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -172,7 +177,7 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
         <Input
           id="partner_name"
           value={formData.partner_name}
-          onChange={(e) => setFormData({ ...formData, partner_name: e.target.value })}
+          onChange={(e) => setField('partner_name', e.target.value)}
           required
           placeholder="Nom de l'entreprise partenaire"
         />
@@ -184,7 +189,7 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
           id="website_url"
           type="url"
           value={formData.website_url}
-          onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+          onChange={(e) => setField('website_url', e.target.value)}
           placeholder="https://www.exemple.com"
         />
         {formData.website_url && (
