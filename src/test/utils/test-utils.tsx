@@ -1,8 +1,7 @@
 
-
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import * as testingLibrary from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
 import { BrowserRouter } from 'react-router-dom';
 import { ServiceProvider } from '@/providers/ServiceProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -35,7 +34,4 @@ const customRender = (
 // Re-export everything from @testing-library/react
 export * from '@testing-library/react';
 // Override render with our custom one and export screen and fireEvent
-export { customRender as render };
-export const screen = testingLibrary.screen;
-export const fireEvent = testingLibrary.fireEvent;
-
+export { customRender as render, screen, fireEvent };
