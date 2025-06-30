@@ -51,7 +51,7 @@ export const useContactForm = () => {
     e.preventDefault();
     
     // Rate limiting check
-    const clientIP = 'user-session'; // In production, you'd get the actual IP
+    const clientIP = 'user-session';
     if (!contactFormRateLimit.isAllowed(clientIP)) {
       const remainingTime = Math.ceil(contactFormRateLimit.getRemainingTime(clientIP) / 1000 / 60);
       showError("Trop de tentatives", `Veuillez attendre ${remainingTime} minutes avant de soumettre un nouveau message.`);
@@ -60,9 +60,9 @@ export const useContactForm = () => {
 
     setErrors({});
 
-    const result = await submitForm(
+    await submitForm(
       async () => {
-        // Validate all fields
+        // Validate all fields using centralized schema
         const validatedData = contactFormSchema.parse(formData);
         
         // Additional sanitization before submission
@@ -74,21 +74,20 @@ export const useContactForm = () => {
           message: sanitizeText(validatedData.message)
         };
 
-        // Try to submit to the contact_submissions table, but handle gracefully if it doesn't exist
+        // Try to submit to the contact_submissions table
         try {
           const { error } = await supabase
             .from('contact_submissions')
             .insert([{
               ...sanitizedData,
               submitted_at: new Date().toISOString(),
-              ip_address: 'hidden', // In production, log IP for security
-              user_agent: navigator.userAgent.substring(0, 500) // Truncate for security
+              ip_address: 'hidden',
+              user_agent: navigator.userAgent.substring(0, 500)
             }]);
 
           if (error) throw error;
         } catch (dbError) {
           console.warn('Contact submissions table not available yet:', dbError);
-          // For now, just log the form data to console since the table doesn't exist
           console.log('Contact form submission:', sanitizedData);
         }
 
@@ -100,7 +99,6 @@ export const useContactForm = () => {
         errorTitle: "Erreur",
         errorContext: "Contact form submission",
         onSuccess: () => {
-          // Reset form on success
           setFormData({
             name: '',
             email: '',

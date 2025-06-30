@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStandardToast } from '@/hooks/useStandardToast';
 import { useFormSubmission } from '@/hooks/useFormSubmission';
-import { contentSectionSchema, sanitizeText } from '@/utils/inputValidation';
+import { contentSectionSchema, sanitizeText } from '@/utils/validationRules';
 import { z } from 'zod';
 
 interface ContentSection {
@@ -75,7 +75,7 @@ export const useContentForm = ({ section, onSuccess }: UseContentFormProps) => {
     }
 
     const submitOperation = async () => {
-      // Validate all fields
+      // Validate using centralized schema
       const validatedData = contentSectionSchema.parse(formData);
       
       // Additional sanitization
@@ -87,7 +87,6 @@ export const useContentForm = ({ section, onSuccess }: UseContentFormProps) => {
       };
 
       if (section) {
-        // Update
         const { error } = await supabase
           .from('content_sections')
           .update({
@@ -99,7 +98,6 @@ export const useContentForm = ({ section, onSuccess }: UseContentFormProps) => {
         if (error) throw error;
         console.log('Content section updated:', sanitizedData.section_key);
       } else {
-        // Create
         const { error } = await supabase
           .from('content_sections')
           .insert([sanitizedData]);
@@ -111,7 +109,7 @@ export const useContentForm = ({ section, onSuccess }: UseContentFormProps) => {
       return sanitizedData;
     };
 
-    const result = await submitForm(submitOperation, {
+    await submitForm(submitOperation, {
       successTitle: "Succès",
       successMessage: section ? "Section mise à jour avec succès" : "Section créée avec succès",
       errorTitle: "Erreur",
