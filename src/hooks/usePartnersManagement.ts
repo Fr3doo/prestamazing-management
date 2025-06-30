@@ -1,11 +1,10 @@
-
 import { useState, useCallback } from 'react';
 import { usePartners } from './usePartners';
 import { useStandardToast } from './useStandardToast';
 import { useErrorHandler } from './useErrorHandler';
 import { Partner } from '@/interfaces/repositories/IPartnerRepository';
 
-export { Partner } from '@/interfaces/repositories/IPartnerRepository';
+export type { Partner } from '@/interfaces/repositories/IPartnerRepository';
 
 export const usePartnersManagement = () => {
   const [showForm, setShowForm] = useState(false);
