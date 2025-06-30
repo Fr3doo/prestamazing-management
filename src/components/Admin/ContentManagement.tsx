@@ -9,6 +9,7 @@ import { Plus, Edit, Eye, EyeOff, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ContentForm from './ContentForm';
+import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
 
 interface ContentSection {
   id: string;
@@ -22,17 +23,23 @@ interface ContentSection {
 
 const ContentManagement = () => {
   const [sections, setSections] = useState<ContentSection[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+
+  const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
+    initialLoading: true,
+    spinnerText: 'Chargement des sections...',
+    fullScreen: false
+  });
 
   useEffect(() => {
     fetchSections();
   }, []);
 
   const fetchSections = async () => {
+    startLoading();
     try {
       const { data, error } = await supabase
         .from('content_sections')
@@ -49,7 +56,7 @@ const ContentManagement = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
 
@@ -77,7 +84,7 @@ const ContentManagement = () => {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Chargement des sections...</div>
+        {LoadingComponent}
       </div>
     );
   }

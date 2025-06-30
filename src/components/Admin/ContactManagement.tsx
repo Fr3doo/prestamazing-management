@@ -8,6 +8,7 @@ import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import ContactInfoForm from './ContactInfoForm';
+import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
 
 interface ContactInfo {
   id: string;
@@ -20,18 +21,24 @@ interface ContactInfo {
 
 const ContactManagement = () => {
   const [contacts, setContacts] = useState<ContactInfo[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editingContact, setEditingContact] = useState<ContactInfo | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const { toast } = useToast();
 
+  const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
+    initialLoading: true,
+    spinnerText: 'Chargement des contacts...',
+    fullScreen: false
+  });
+
   useEffect(() => {
     fetchContacts();
   }, []);
 
   const fetchContacts = async () => {
+    startLoading();
     try {
       const { data, error } = await supabase
         .from('contact_info')
@@ -48,7 +55,7 @@ const ContactManagement = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
 
@@ -120,7 +127,7 @@ const ContactManagement = () => {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Chargement des contacts...</div>
+        {LoadingComponent}
       </div>
     );
   }

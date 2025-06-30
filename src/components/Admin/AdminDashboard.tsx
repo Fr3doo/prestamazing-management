@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Users, Phone, FileText } from 'lucide-react';
+import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
 
 interface Stats {
   reviews: number;
@@ -18,13 +19,19 @@ const AdminDashboard = () => {
     contacts: 0,
     content: 0,
   });
-  const [loading, setLoading] = useState(true);
+
+  const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
+    initialLoading: true,
+    spinnerText: 'Chargement des statistiques...',
+    fullScreen: false
+  });
 
   useEffect(() => {
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
+    startLoading();
     try {
       const [reviewsRes, partnersRes, contactsRes, contentRes] = await Promise.all([
         supabase.from('reviews').select('id', { count: 'exact', head: true }),
@@ -42,7 +49,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
 
@@ -84,7 +91,7 @@ const AdminDashboard = () => {
           <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
           <p className="text-gray-600">Vue d'ensemble de votre contenu</p>
         </div>
-        <div className="text-center">Chargement...</div>
+        {LoadingComponent}
       </div>
     );
   }
