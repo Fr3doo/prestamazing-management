@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Analytics from '@/components/Admin/Analytics';
@@ -9,22 +7,9 @@ import NotificationSystem from '@/components/Admin/NotificationSystem';
 import DataBackup from '@/components/Admin/DataBackup';
 import ActivityLogs from '@/components/Admin/ActivityLogs';
 import SEOConfiguration from '@/components/Admin/SEOConfiguration';
+import withAdminProtection from '@/components/Admin/withAdminProtection';
 
 const AdminAdvanced = () => {
-  const { user, isAdmin, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Chargement...</div>
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return <Navigate to="/auth" replace />;
-  }
-
   return (
     <AdminLayout>
       <div className="p-6">
@@ -67,4 +52,4 @@ const AdminAdvanced = () => {
   );
 };
 
-export default AdminAdvanced;
+export default withAdminProtection(AdminAdvanced);
