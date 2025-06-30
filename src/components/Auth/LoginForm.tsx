@@ -1,0 +1,18 @@
+
+import React from 'react';
+import AuthForm from './AuthForm';
+
+interface LoginFormProps {
+  onSubmit: (email: string, password: string) => Promise<void>;
+  loading: boolean;
+}
+
+const LoginForm = ({ onSubmit, loading }: LoginFormProps) => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <AuthForm onSubmit={onSubmit} loading={loading} />
+    </div>
+  );
+};
+
+export default LoginForm;
