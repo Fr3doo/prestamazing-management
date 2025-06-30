@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { AdminService } from '@/services/AdminService';
 
-interface UseAdminCheckReturn {
+export interface UseAdminCheckReturn {
   isAdmin: boolean;
   loading: boolean;
   checkAdminStatus: (userId: string) => Promise<boolean>;
