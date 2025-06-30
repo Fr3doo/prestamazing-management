@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReviewForm from '../ReviewForm';
-import { Review } from '@/hooks/useReviewsManager';
+import { Review } from '@/hooks/useReviewsManagement';
 
 interface ReviewsFormWrapperProps {
   editingReview: Review | null;
