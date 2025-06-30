@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { IAuthService } from '@/interfaces/IAuthService';
 import { IAdminService } from '@/interfaces/IAdminService';
@@ -12,7 +11,9 @@ import { IStatisticsService } from '@/interfaces/IStatisticsService';
 import { IPartnerService } from '@/interfaces/IPartnerService';
 import { AuthService } from '@/services/AuthService';
 import { AdminService } from '@/services/AdminService';
-import { securityMonitor } from '@/utils/securityMonitoring';
+import { SecurityMonitorImpl } from '@/utils/securityMonitoring';
+import { SupabaseSecurityEventRepository } from '@/repositories/SupabaseSecurityEventRepository';
+import { ISecurityEventRepository } from '@/interfaces/repositories/ISecurityEventRepository';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseContactRepository } from '@/repositories/SupabaseContactRepository';
 import { SupabaseReviewRepository } from '@/repositories/SupabaseReviewRepository';
@@ -45,6 +46,7 @@ interface ServiceProviderProps {
   reviewRepository?: IReviewRepository;
   contentRepository?: IContentRepository;
   partnerRepository?: IPartnerRepository;
+  securityEventRepository?: ISecurityEventRepository;
   statisticsService?: IStatisticsService;
   partnerService?: IPartnerService;
 }
@@ -52,26 +54,32 @@ interface ServiceProviderProps {
 // Wrapper pour Supabase client
 class SupabaseClientWrapper implements ISupabaseClient {
   client = supabase;
-  
+
   from<T extends keyof Database['public']['Tables']>(table: T) {
     return this.client.from(table);
   }
-  
+
   get auth() {
     return this.client.auth;
   }
 }
 
-export const ServiceProvider: React.FC<ServiceProviderProps> = ({ 
+export const ServiceProvider: React.FC<ServiceProviderProps> = ({
   children,
   contactRepository,
   reviewRepository,
   contentRepository,
   partnerRepository,
+  securityEventRepository,
   statisticsService: injectedStatisticsService,
-  partnerService: injectedPartnerService
+  partnerService: injectedPartnerService,
 }) => {
   const supabaseClient = new SupabaseClientWrapper();
+
+  const securityRepo: ISecurityEventRepository =
+    securityEventRepository || new SupabaseSecurityEventRepository();
+
+  const securityMonitor = SecurityMonitorImpl.getInstance(securityRepo);
 
   const services: ServiceContextType = {
     authService: AuthService,
@@ -84,7 +92,9 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({
     contentRepository: contentRepository || new SupabaseContentRepository(),
     partnerRepository: partnerRepository || new SupabasePartnerRepository(),
     statisticsService: injectedStatisticsService || statisticsService,
-    partnerService: injectedPartnerService || new PartnerService(partnerRepository || new SupabasePartnerRepository()),
+    partnerService:
+      injectedPartnerService ||
+      new PartnerService(partnerRepository || new SupabasePartnerRepository()),
   };
 
   return (
