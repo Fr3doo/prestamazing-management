@@ -1,15 +1,15 @@
 
 import React from 'react';
-import withProtection from '@/components/common/withProtection';
+import withProtection from './withProtection';
 
-const withAdminProtection = <P extends object>(
+const withAuthProtection = <P extends object>(
   WrappedComponent: React.ComponentType<P>
 ) => {
   return withProtection(WrappedComponent, {
     requireAuth: true,
-    requireAdmin: true,
+    requireAdmin: false,
     redirectTo: '/auth'
   });
 };
 
-export default withAdminProtection;
+export default withAuthProtection;
