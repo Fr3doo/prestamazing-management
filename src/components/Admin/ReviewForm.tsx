@@ -3,9 +3,9 @@ import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGenericForm } from '@/hooks/useGenericForm';
 import { reviewValidationSchema } from '@/utils/validationRules';
-import { Star } from 'lucide-react';
 import FormField from '@/components/common/FormField';
 import FormActions from '@/components/common/FormActions';
+import StarRating from '@/components/common/StarRating';
 
 interface Review {
   id: string;
@@ -69,7 +69,7 @@ const ReviewForm = ({ review, onSuccess, onCancel }: ReviewFormProps) => {
     onSuccess,
   });
 
-  const handleRatingClick = (rating: number) => {
+  const handleRatingChange = (rating: number) => {
     setFormData(prev => ({ ...prev, rating }));
   };
 
@@ -86,32 +86,14 @@ const ReviewForm = ({ review, onSuccess, onCancel }: ReviewFormProps) => {
         error={errors.name}
       />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">
-          Note <span className="text-red-500">*</span>
-        </label>
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => handleRatingClick(star)}
-              className="text-2xl hover:scale-110 transition-transform"
-            >
-              <Star
-                className={`h-6 w-6 ${
-                  star <= formData.rating
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
-                }`}
-              />
-            </button>
-          ))}
-          <span className="ml-2 text-sm text-gray-600">
-            {formData.rating}/5 étoiles
-          </span>
-        </div>
-      </div>
+      <StarRating
+        rating={formData.rating}
+        onRatingChange={handleRatingChange}
+        label="Note"
+        required
+        fieldId="rating"
+        error={errors.rating}
+      />
 
       <FormField
         type="textarea"
