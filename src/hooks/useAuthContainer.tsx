@@ -1,6 +1,7 @@
 
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthNavigation } from '@/hooks/useAuthNavigation';
 
 export interface UseAuthContainerReturn {
   user: any;
@@ -13,9 +14,15 @@ export interface UseAuthContainerReturn {
 
 export const useAuthContainer = (): UseAuthContainerReturn => {
   const { signIn, signOut, user, isAdmin, initialized, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Gestion de la navigation
-  useAuthNavigation({ user, isAdmin, initialized });
+  // Navigation directe basée sur l'état auth
+  useEffect(() => {
+    if (initialized && user && isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [initialized, user, isAdmin, navigate]);
 
   const handleSignIn = async (email: string, password: string) => {
     try {

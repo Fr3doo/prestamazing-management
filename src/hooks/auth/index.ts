@@ -3,7 +3,6 @@ export { useAuth, AuthProvider } from '../useAuth';
 export { useAuthState } from '../useAuthState';
 export { useAuthActions } from '../useAuthActions';
 export { useAdminCheck } from '../useAdminCheck';
-export { useAuthNavigation } from '../useAuthNavigation';
 
 // Types d'authentification
 export type { UseAuthStateReturn } from '../useAuthState';
