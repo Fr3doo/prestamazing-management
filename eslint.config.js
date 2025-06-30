@@ -1,3 +1,4 @@
+
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -24,6 +25,13 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      // Prettier compatibility rules
+      "max-len": "off",
+      "quotes": "off",
+      "semi": "off",
+      "comma-dangle": "off",
+      "object-curly-spacing": "off",
+      "array-bracket-spacing": "off"
     },
   }
 );

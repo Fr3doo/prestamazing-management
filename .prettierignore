@@ -1,0 +1,33 @@
+
+# Dependencies
+node_modules/
+dist/
+build/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Lock files
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Config files that shouldn't be formatted
+.env*
+*.config.js
+vite.config.ts
+
+# Documentation
+README.md
+CHANGELOG.md
+
+# Supabase
+supabase/migrations/
