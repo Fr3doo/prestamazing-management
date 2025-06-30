@@ -1,140 +1,73 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-export interface Review {
-  id: string;
-  user_name: string;
-  comment: string;
-  rating: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReviewsManagerState {
-  reviews: Review[];
-  loading: boolean;
-  showForm: boolean;
-  editingReview: Review | null;
-}
-
-export interface ReviewsManagerActions {
-  fetchReviews: () => Promise<void>;
-  handleDelete: (id: string) => Promise<void>;
-  handleEdit: (review: Review) => void;
-  handleFormSuccess: () => void;
-  handleFormCancel: () => void;
-  handleAddReview: () => void;
-}
+import { useState, useCallback } from 'react';
+import { useReviewsManagement, Review } from './useReviewsManagement';
+import { useStandardToast } from './useStandardToast';
+import { useErrorHandler } from './useErrorHandler';
 
 export const useReviewsManager = () => {
-  const [state, setState] = useState<ReviewsManagerState>({
-    reviews: [],
-    loading: true,
-    showForm: false,
-    editingReview: null,
-  });
+  const [showForm, setShowForm] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  
+  const {
+    reviews,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    filterRating,
+    setFilterRating,
+    fetchReviews,
+    deleteReview,
+  } = useReviewsManagement();
 
-  const { toast } = useToast();
+  const { showSuccess } = useStandardToast();
+  const { handleError } = useErrorHandler();
 
-  const fetchReviews = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setState(prev => ({ ...prev, reviews: data || [], loading: false }));
-    } catch (error) {
-      console.error('Erreur lors du chargement des avis:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les avis",
-        variant: "destructive",
-      });
-      setState(prev => ({ ...prev, loading: false }));
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setState(prev => ({
-        ...prev,
-        reviews: prev.reviews.filter(review => review.id !== id)
-      }));
-      
-      toast({
-        title: "Succès",
-        description: "Avis supprimé avec succès",
-      });
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer l'avis",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEdit = (review: Review) => {
-    setState(prev => ({
-      ...prev,
-      editingReview: review,
-      showForm: true
-    }));
-  };
-
-  const handleFormSuccess = () => {
-    setState(prev => ({
-      ...prev,
-      showForm: false,
-      editingReview: null
-    }));
-    fetchReviews();
-  };
-
-  const handleFormCancel = () => {
-    setState(prev => ({
-      ...prev,
-      showForm: false,
-      editingReview: null
-    }));
-  };
-
-  const handleAddReview = () => {
-    setState(prev => ({
-      ...prev,
-      showForm: true,
-      editingReview: null
-    }));
-  };
-
-  useEffect(() => {
-    fetchReviews();
+  const handleAddReview = useCallback(() => {
+    setEditingReview(null);
+    setShowForm(true);
   }, []);
 
-  const actions: ReviewsManagerActions = {
-    fetchReviews,
-    handleDelete,
-    handleEdit,
-    handleFormSuccess,
-    handleFormCancel,
-    handleAddReview,
-  };
+  const handleEdit = useCallback((review: Review) => {
+    setEditingReview(review);
+    setShowForm(true);
+  }, []);
 
-  return { state, actions };
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      await deleteReview(id);
+    } catch (error) {
+      handleError(error, { logContext: 'Review deletion from manager' });
+    }
+  }, [deleteReview, handleError]);
+
+  const handleFormSuccess = useCallback(() => {
+    setEditingReview(null);
+    setShowForm(false);
+    fetchReviews();
+  }, [fetchReviews]);
+
+  const handleFormCancel = useCallback(() => {
+    setEditingReview(null);
+    setShowForm(false);
+  }, []);
+
+  return {
+    state: {
+      reviews,
+      loading,
+      showForm,
+      editingReview,
+      searchTerm,
+      filterRating,
+    },
+    actions: {
+      handleAddReview,
+      handleEdit,
+      handleDelete,
+      handleFormSuccess,
+      handleFormCancel,
+      setSearchTerm,
+      setFilterRating,
+    },
+  };
 };
