@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from './useStandardToast';
 import { useErrorHandler } from './useErrorHandler';
 
 export interface FormSubmissionOptions {
@@ -14,7 +14,7 @@ export interface FormSubmissionOptions {
 
 export const useFormSubmission = () => {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { showSuccess } = useStandardToast();
   const { handleError } = useErrorHandler();
 
   const submitForm = useCallback(async <T>(
@@ -35,11 +35,7 @@ export const useFormSubmission = () => {
     try {
       const result = await submitFunction();
       
-      toast({
-        title: successTitle,
-        description: successMessage,
-      });
-
+      showSuccess(successTitle, successMessage);
       onSuccess?.();
       return result;
     } catch (error) {
@@ -53,7 +49,7 @@ export const useFormSubmission = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, handleError]);
+  }, [showSuccess, handleError]);
 
   return {
     loading,

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from '@/hooks/useStandardToast';
 
 interface ContactInfo {
   id: string;
@@ -30,7 +29,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     label: '',
   });
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStandardToast();
 
   const contactTypes = [
     { value: 'phone', label: 'Téléphone' },
@@ -58,11 +57,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     e.preventDefault();
     
     if (!formData.type.trim() || !formData.value.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      });
+      showError("Erreur", "Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -82,11 +77,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
           .eq('id', contact.id);
 
         if (error) throw error;
-
-        toast({
-          title: "Succès",
-          description: "Information de contact mise à jour",
-        });
+        showSuccess("Succès", "Information de contact mise à jour");
       } else {
         // Création
         const { error } = await supabase
@@ -98,21 +89,13 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
           });
 
         if (error) throw error;
-
-        toast({
-          title: "Succès",
-          description: "Information de contact créée",
-        });
+        showSuccess("Succès", "Information de contact créée");
       }
 
       onSuccess();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder l'information de contact",
-        variant: "destructive",
-      });
+      showError("Erreur", "Impossible de sauvegarder l'information de contact");
     } finally {
       setLoading(false);
     }

@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from '@/hooks/useStandardToast';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +24,7 @@ const ContactManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStandardToast();
 
   const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
     initialLoading: true,
@@ -49,11 +48,7 @@ const ContactManagement = () => {
       setContacts(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des contacts:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les informations de contact",
-        variant: "destructive",
-      });
+      showError("Erreur", "Impossible de charger les informations de contact");
     } finally {
       stopLoading();
     }
@@ -71,20 +66,11 @@ const ContactManagement = () => {
         .eq('id', id);
 
       if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "Information de contact supprimée",
-      });
-
+      showSuccess("Succès", "Information de contact supprimée");
       fetchContacts();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer l'information de contact",
-        variant: "destructive",
-      });
+      showError("Erreur", "Impossible de supprimer l'information de contact");
     }
   };
 

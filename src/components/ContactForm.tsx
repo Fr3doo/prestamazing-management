@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,7 @@ import {
 } from '@/utils/inputValidation';
 import { z } from 'zod';
 import { useFormSubmission } from '@/hooks/useFormSubmission';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from '@/hooks/useStandardToast';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +22,7 @@ const ContactForm = () => {
     message: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
+  const { showError } = useStandardToast();
   const { loading, submitForm } = useFormSubmission();
 
   const validateField = (field: string, value: string) => {
@@ -57,11 +56,7 @@ const ContactForm = () => {
     const clientIP = 'user-session'; // In production, you'd get the actual IP
     if (!contactFormRateLimit.isAllowed(clientIP)) {
       const remainingTime = Math.ceil(contactFormRateLimit.getRemainingTime(clientIP) / 1000 / 60);
-      toast({
-        title: "Trop de tentatives",
-        description: `Veuillez attendre ${remainingTime} minutes avant de soumettre un nouveau message.`,
-        variant: "destructive",
-      });
+      showError("Trop de tentatives", `Veuillez attendre ${remainingTime} minutes avant de soumettre un nouveau message.`);
       return;
     }
 
@@ -126,11 +121,7 @@ const ContactForm = () => {
             });
             setErrors(newErrors);
             
-            toast({
-              title: "Erreur de validation",
-              description: "Veuillez corriger les erreurs dans le formulaire.",
-              variant: "destructive",
-            });
+            showError("Erreur de validation", "Veuillez corriger les erreurs dans le formulaire.");
           }
         }
       }

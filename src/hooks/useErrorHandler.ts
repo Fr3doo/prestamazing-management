@@ -1,15 +1,16 @@
 
-import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
+import { useStandardToast } from './useStandardToast';
 
 export interface ErrorHandlerOptions {
   title?: string;
   defaultMessage?: string;
   logContext?: string;
+  showToast?: boolean;
 }
 
 export const useErrorHandler = () => {
-  const { toast } = useToast();
+  const { showError } = useStandardToast();
 
   const handleError = useCallback((
     error: unknown,
@@ -18,7 +19,8 @@ export const useErrorHandler = () => {
     const {
       title = "Erreur",
       defaultMessage = "Une erreur inattendue s'est produite",
-      logContext
+      logContext,
+      showToast = true
     } = options;
 
     const errorMessage = error instanceof Error ? error.message : defaultMessage;
@@ -31,14 +33,12 @@ export const useErrorHandler = () => {
     }
 
     // Toast standardisé
-    toast({
-      title,
-      description: errorMessage,
-      variant: "destructive",
-    });
+    if (showToast) {
+      showError(title, errorMessage);
+    }
 
     return errorMessage;
-  }, [toast]);
+  }, [showError]);
 
   const handleAsyncError = useCallback(async <T>(
     asyncOperation: () => Promise<T>,

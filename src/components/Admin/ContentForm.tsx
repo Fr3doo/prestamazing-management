@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from '@/hooks/useStandardToast';
 import { useFormSubmission } from '@/hooks/useFormSubmission';
 import { contentSectionSchema, sanitizeText } from '@/utils/inputValidation';
 import { z } from 'zod';
@@ -34,7 +33,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
     image_url: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
+  const { showError } = useStandardToast();
   const { loading, submitForm } = useFormSubmission();
 
   useEffect(() => {
@@ -75,11 +74,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
     e.preventDefault();
     
     if (!formData.section_key.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir la clé de section",
-        variant: "destructive",
-      });
+      showError("Erreur", "Veuillez remplir la clé de section");
       return;
     }
 
@@ -106,13 +101,7 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
           .eq('id', section.id);
 
         if (error) throw error;
-
         console.log('Content section updated:', sanitizedData.section_key);
-
-        toast({
-          title: "Succès",
-          description: "Section mise à jour avec succès",
-        });
       } else {
         // Create
         const { error } = await supabase
@@ -120,28 +109,19 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
           .insert([sanitizedData]);
 
         if (error) throw error;
-
         console.log('Content section created:', sanitizedData.section_key);
-
-        toast({
-          title: "Succès",
-          description: "Section créée avec succès",
-        });
       }
 
       return sanitizedData;
     };
 
     const result = await submitForm(submitOperation, {
+      successTitle: "Succès",
+      successMessage: section ? "Section mise à jour avec succès" : "Section créée avec succès",
+      errorTitle: "Erreur",
+      errorContext: 'Content form submission',
       onSuccess: () => onSuccess(),
-      errorContext: 'Content form submission'
-    });
-
-    // Handle validation errors specifically
-    if (!result) {
-      try {
-        contentSectionSchema.parse(formData);
-      } catch (error) {
+      onError: (error) => {
         if (error instanceof z.ZodError) {
           const newErrors: Record<string, string> = {};
           error.errors.forEach(err => {
@@ -151,14 +131,10 @@ const ContentForm = ({ section, onSuccess, onCancel }: ContentFormProps) => {
           });
           setErrors(newErrors);
           
-          toast({
-            title: "Erreur de validation",
-            description: "Veuillez corriger les erreurs dans le formulaire.",
-            variant: "destructive",
-          });
+          showError("Erreur de validation", "Veuillez corriger les erreurs dans le formulaire.");
         }
       }
-    }
+    });
   };
 
   return (

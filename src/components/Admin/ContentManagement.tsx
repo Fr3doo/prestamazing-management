@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useStandardToast } from '@/hooks/useStandardToast';
 import { Plus, Edit, Eye, EyeOff, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +25,7 @@ const ContentManagement = () => {
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
+  const { showError } = useStandardToast();
 
   const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
     initialLoading: true,
@@ -50,11 +49,7 @@ const ContentManagement = () => {
       setSections(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des sections:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les sections de contenu",
-        variant: "destructive",
-      });
+      showError("Erreur", "Impossible de charger les sections de contenu");
     } finally {
       stopLoading();
     }
