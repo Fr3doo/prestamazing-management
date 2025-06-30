@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { AdminService } from '@/services/AdminService';
+import { IAdminService } from '@/interfaces/IAdminService';
 import { useLoadingState } from './useLoadingState';
 
 export interface UseAdminCheckReturn {
@@ -10,12 +10,12 @@ export interface UseAdminCheckReturn {
   checkAdminStatus: (userId: string) => Promise<boolean>;
 }
 
-export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
+export const useAdminCheck = (user: User | null, adminService: IAdminService): UseAdminCheckReturn => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { loading, startLoading, stopLoading } = useLoadingState();
 
   const checkAdminStatus = async (userId: string) => {
-    return await AdminService.checkAdminStatus(userId);
+    return await adminService.checkAdminStatus(userId);
   };
 
   useEffect(() => {
@@ -27,8 +27,8 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
         .then(async (adminStatus) => {
           console.log('Admin status for user:', user.id, adminStatus);
           
-          // Log admin access attempt
-          await AdminService.logAdminAccess(user.id, adminStatus);
+          // Log admin access attempt using injected service
+          await adminService.logAdminAccess(user.id, adminStatus);
           
           if (isMounted) {
             setIsAdmin(adminStatus);
@@ -53,7 +53,7 @@ export const useAdminCheck = (user: User | null): UseAdminCheckReturn => {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, startLoading, stopLoading]);
+  }, [user?.id, startLoading, stopLoading, adminService]);
 
   return {
     isAdmin,

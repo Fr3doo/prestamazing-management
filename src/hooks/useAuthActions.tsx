@@ -1,19 +1,18 @@
 
-import { AuthService } from '@/services/AuthService';
-import { SignInResult } from '@/interfaces/IAuthService';
+import { IAuthService, SignInResult } from '@/interfaces/IAuthService';
 
 export interface UseAuthActionsReturn {
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
 }
 
-export const useAuthActions = (): UseAuthActionsReturn => {
+export const useAuthActions = (authService: IAuthService): UseAuthActionsReturn => {
   const signIn = async (email: string, password: string): Promise<SignInResult> => {
-    return await AuthService.signIn(email, password);
+    return await authService.signIn(email, password);
   };
 
   const signOut = async (): Promise<void> => {
-    await AuthService.signOut();
+    await authService.signOut();
   };
 
   return {

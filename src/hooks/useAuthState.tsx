@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { AuthService } from '@/services/AuthService';
+import { IAuthService } from '@/interfaces/IAuthService';
 
 export interface UseAuthStateReturn {
   user: User | null;
@@ -9,7 +9,7 @@ export interface UseAuthStateReturn {
   initialized: boolean;
 }
 
-export const useAuthState = (): UseAuthStateReturn => {
+export const useAuthState = (authService: IAuthService): UseAuthStateReturn => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [initialized, setInitialized] = useState(false);
@@ -17,8 +17,8 @@ export const useAuthState = (): UseAuthStateReturn => {
   useEffect(() => {
     let isMounted = true;
 
-    // Set up auth state listener using AuthService
-    const { data: { subscription } } = AuthService.setupAuthStateListener(
+    // Set up auth state listener using injected AuthService
+    const { data: { subscription } } = authService.setupAuthStateListener(
       (event, session) => {
         if (!isMounted) return;
 
@@ -31,10 +31,10 @@ export const useAuthState = (): UseAuthStateReturn => {
       }
     );
 
-    // Get initial session using AuthService
+    // Get initial session using injected AuthService
     const initializeAuth = async () => {
       try {
-        const { session } = await AuthService.getSession();
+        const { session } = await authService.getSession();
         console.log('Initial session:', session?.user?.id);
         
         if (!isMounted) return;
@@ -56,7 +56,7 @@ export const useAuthState = (): UseAuthStateReturn => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [authService]);
 
   return {
     user,
