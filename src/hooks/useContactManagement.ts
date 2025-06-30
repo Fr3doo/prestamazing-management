@@ -1,116 +1,99 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useStandardToast } from '@/hooks/useStandardToast';
-import { useLoadingSpinner } from '@/hooks/useLoadingSpinner';
-
-interface ContactInfo {
-  id: string;
-  type: string;
-  value: string;
-  label: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useState, useCallback, useMemo } from 'react';
+import { useContacts } from './useContacts';
+import { useLoadingSpinner } from './useLoadingSpinner';
+import { useStandardToast } from './useStandardToast';
+import { useErrorHandler } from './useErrorHandler';
+import { ContactInfo } from '@/interfaces/repositories/IContactRepository';
 
 export const useContactManagement = () => {
-  const [contacts, setContacts] = useState<ContactInfo[]>([]);
   const [editingContact, setEditingContact] = useState<ContactInfo | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const { showSuccess, showError } = useStandardToast();
+  const [filterType, setFilterType] = useState<string>('');
 
-  const { loading, startLoading, stopLoading, LoadingComponent } = useLoadingSpinner({
-    initialLoading: true,
-    spinnerText: 'Chargement des contacts...',
-    fullScreen: false
+  const {
+    contactInfo: allContacts,
+    loading,
+    error,
+    refetch,
+    deleteContactInfo: deleteContactBase
+  } = useContacts();
+
+  const { showSuccess } = useStandardToast();
+  const { handleError } = useErrorHandler();
+  const { LoadingComponent } = useLoadingSpinner({
+    initialLoading: loading,
+    spinnerText: 'Chargement des contacts...'
   });
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+  // Filter contacts based on search term and type
+  const contacts = useMemo(() => {
+    let filtered = allContacts;
 
-  const fetchContacts = async () => {
-    startLoading();
+    if (searchTerm) {
+      filtered = filtered.filter(contact =>
+        contact.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (contact.label && contact.label.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (filterType) {
+      filtered = filtered.filter(contact => contact.type === filterType);
+    }
+
+    return filtered;
+  }, [allContacts, searchTerm, filterType]);
+
+  // Get unique types for filter dropdown
+  const uniqueTypes = useMemo(() => {
+    const types = new Set(allContacts.map(contact => contact.type));
+    return Array.from(types).sort();
+  }, [allContacts]);
+
+  const handleDelete = useCallback(async (id: string) => {
     try {
-      const { data, error } = await supabase
-        .from('contact_info')
-        .select('*')
-        .order('type', { ascending: true });
-
-      if (error) throw error;
-      setContacts(data || []);
+      await deleteContactBase(id);
+      showSuccess('Contact supprimé', 'Le contact a été supprimé avec succès.');
     } catch (error) {
-      console.error('Erreur lors du chargement des contacts:', error);
-      showError("Erreur", "Impossible de charger les informations de contact");
-    } finally {
-      stopLoading();
+      handleError(error, {
+        title: 'Erreur de suppression',
+        logContext: 'Contact deletion'
+      });
     }
-  };
+  }, [deleteContactBase, showSuccess, handleError]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette information de contact ?')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('contact_info')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      showSuccess("Succès", "Information de contact supprimée");
-      fetchContacts();
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      showError("Erreur", "Impossible de supprimer l'information de contact");
-    }
-  };
-
-  const handleFormSuccess = () => {
-    setEditingContact(null);
-    setShowForm(false);
-    fetchContacts();
-  };
-
-  const handleFormCancel = () => {
-    setEditingContact(null);
-    setShowForm(false);
-  };
-
-  const handleEdit = (contact: ContactInfo) => {
+  const handleEdit = useCallback((contact: ContactInfo) => {
     setEditingContact(contact);
     setShowForm(true);
-  };
+  }, []);
 
-  const handleAddContact = () => {
+  const handleAddContact = useCallback(() => {
     setEditingContact(null);
     setShowForm(true);
-  };
+  }, []);
 
-  const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = 
-      contact.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.label && contact.label.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesFilter = filterType === 'all' || contact.type === filterType;
-    
-    return matchesSearch && matchesFilter;
-  });
+  const handleFormSuccess = useCallback(() => {
+    setShowForm(false);
+    setEditingContact(null);
+    refetch();
+  }, [refetch]);
 
-  const uniqueTypes = [...new Set(contacts.map(c => c.type))];
+  const handleFormCancel = useCallback(() => {
+    setShowForm(false);
+    setEditingContact(null);
+  }, []);
 
   return {
-    contacts: filteredContacts,
+    contacts,
     editingContact,
     showForm,
     searchTerm,
     filterType,
     uniqueTypes,
     loading,
+    error,
     LoadingComponent,
     setSearchTerm,
     setFilterType,

@@ -1,76 +1,68 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useStandardToast } from '@/hooks/useStandardToast';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useState, useCallback, useMemo } from 'react';
+import { useReviews } from './useReviews';
+import { useStandardToast } from './useStandardToast';
+import { useErrorHandler } from './useErrorHandler';
 
 export interface Review {
   id: string;
   user_name: string;
   rating: number;
   comment: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const useReviewsManagement = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  
+  const {
+    reviews: allReviews,
+    loading,
+    error,
+    refetch: fetchReviews,
+    deleteReview: deleteReviewBase
+  } = useReviews();
+
   const { showSuccess } = useStandardToast();
   const { handleError } = useErrorHandler();
 
-  const fetchReviews = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Filter reviews based on search term and rating
+  const reviews = useMemo(() => {
+    let filtered = allReviews;
 
-      if (error) throw error;
-      setReviews(data || []);
-    } catch (error) {
-      handleError(error, { logContext: 'Reviews fetch' });
-    } finally {
-      setLoading(false);
+    if (searchTerm) {
+      filtered = filtered.filter(review =>
+        review.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.comment.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  };
 
-  const deleteReview = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      setReviews(prev => prev.filter(review => review.id !== id));
-      showSuccess("Succès", "Avis supprimé avec succès");
-    } catch (error) {
-      handleError(error, { logContext: 'Review deletion' });
+    if (filterRating !== null) {
+      filtered = filtered.filter(review => review.rating === filterRating);
     }
-  };
 
-  const filteredReviews = reviews.filter(review => {
-    const matchesSearch = !searchTerm || 
-      review.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.comment.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRating = filterRating === null || review.rating === filterRating;
-    
-    return matchesSearch && matchesRating;
-  });
+    return filtered;
+  }, [allReviews, searchTerm, filterRating]);
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
+  const deleteReview = useCallback(async (id: string) => {
+    try {
+      await deleteReviewBase(id);
+      showSuccess('Avis supprimé', 'L\'avis a été supprimé avec succès.');
+    } catch (error) {
+      handleError(error, {
+        title: 'Erreur de suppression',
+        logContext: 'Review deletion'
+      });
+      throw error;
+    }
+  }, [deleteReviewBase, showSuccess, handleError]);
 
   return {
-    reviews: filteredReviews,
+    reviews,
     loading,
+    error,
     searchTerm,
     setSearchTerm,
     filterRating,
