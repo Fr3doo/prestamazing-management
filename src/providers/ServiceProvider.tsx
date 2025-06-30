@@ -4,10 +4,18 @@ import { IAuthService } from '@/interfaces/IAuthService';
 import { IAdminService } from '@/interfaces/IAdminService';
 import { ISecurityService } from '@/interfaces/ISecurityService';
 import { ISupabaseClient } from '@/interfaces/ISupabaseClient';
+import { IContactRepository } from '@/interfaces/repositories/IContactRepository';
+import { IReviewRepository } from '@/interfaces/repositories/IReviewRepository';
+import { IContentRepository } from '@/interfaces/repositories/IContentRepository';
+import { IPartnerRepository } from '@/interfaces/repositories/IPartnerRepository';
 import { AuthService } from '@/services/AuthService';
 import { AdminService } from '@/services/AdminService';
 import { securityMonitor } from '@/utils/securityMonitoring';
 import { supabase } from '@/integrations/supabase/client';
+import { SupabaseContactRepository } from '@/repositories/SupabaseContactRepository';
+import { SupabaseReviewRepository } from '@/repositories/SupabaseReviewRepository';
+import { SupabaseContentRepository } from '@/repositories/SupabaseContentRepository';
+import { SupabasePartnerRepository } from '@/repositories/SupabasePartnerRepository';
 import type { Database } from '@/integrations/supabase/types';
 
 interface ServiceContextType {
@@ -15,12 +23,22 @@ interface ServiceContextType {
   adminService: IAdminService;
   securityService: ISecurityService;
   supabaseClient: ISupabaseClient;
+  // Nouveaux repositories
+  contactRepository: IContactRepository;
+  reviewRepository: IReviewRepository;
+  contentRepository: IContentRepository;
+  partnerRepository: IPartnerRepository;
 }
 
 const ServiceContext = createContext<ServiceContextType | undefined>(undefined);
 
 interface ServiceProviderProps {
   children: ReactNode;
+  // Permet l'injection de repositories pour les tests
+  contactRepository?: IContactRepository;
+  reviewRepository?: IReviewRepository;
+  contentRepository?: IContentRepository;
+  partnerRepository?: IPartnerRepository;
 }
 
 // Wrapper pour Supabase client
@@ -36,7 +54,13 @@ class SupabaseClientWrapper implements ISupabaseClient {
   }
 }
 
-export const ServiceProvider: React.FC<ServiceProviderProps> = ({ children }) => {
+export const ServiceProvider: React.FC<ServiceProviderProps> = ({ 
+  children,
+  contactRepository,
+  reviewRepository,
+  contentRepository,
+  partnerRepository
+}) => {
   const supabaseClient = new SupabaseClientWrapper();
   
   const services: ServiceContextType = {
@@ -44,6 +68,11 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ children }) =>
     adminService: AdminService,
     securityService: securityMonitor,
     supabaseClient,
+    // Injection des repositories avec fallback vers les implémentations Supabase
+    contactRepository: contactRepository || new SupabaseContactRepository(),
+    reviewRepository: reviewRepository || new SupabaseReviewRepository(),
+    contentRepository: contentRepository || new SupabaseContentRepository(),
+    partnerRepository: partnerRepository || new SupabasePartnerRepository(),
   };
 
   return (

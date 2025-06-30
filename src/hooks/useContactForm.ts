@@ -2,11 +2,12 @@
 import { useGenericFormWithEmail } from '@/hooks/useGenericForm';
 import { contactFormSchema } from '@/utils/validationRules';
 import { contactFormRateLimit } from '@/utils/inputValidation';
-import { supabase } from '@/integrations/supabase/client';
 import { useStandardToast } from '@/hooks/useStandardToast';
+import { useRepositories } from '@/hooks/useRepositories';
 
 export const useContactForm = () => {
   const { showError } = useStandardToast();
+  const { contactRepository } = useRepositories();
 
   return useGenericFormWithEmail({
     initialData: {
@@ -30,18 +31,14 @@ export const useContactForm = () => {
         email: data.email,
         subject: data.subject,
         message: data.message,
-        phone: data.phone || null,
+        phone: data.phone || undefined,
         submitted_at: new Date().toISOString(),
         ip_address: 'hidden',
         user_agent: navigator.userAgent.substring(0, 500)
       };
 
       try {
-        const { error } = await supabase
-          .from('contact_submissions')
-          .insert([submitData]);
-
-        if (error) throw error;
+        await contactRepository.createContactSubmission(submitData);
       } catch (dbError) {
         console.warn('Contact submissions table not available yet:', dbError);
         console.log('Contact form submission:', submitData);
