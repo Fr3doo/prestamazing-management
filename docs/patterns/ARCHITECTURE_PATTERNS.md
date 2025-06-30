@@ -1,10 +1,9 @@
 
-# Patterns et Architectures Recommandés
+# Patterns d'Architecture
 
-## 🏗️ Patterns d'Architecture
+## 🏗️ Layered Architecture
 
-### 1. Layered Architecture
-
+### Structure Recommandée
 ```
 ┌─────────────────────────────────────┐
 │           UI Components             │ ← Présentation
@@ -17,7 +16,7 @@
 └─────────────────────────────────────┘
 ```
 
-#### Implémentation
+### Implémentation
 ```typescript
 // 1. Repository Layer - Accès aux données
 class ContactRepository {
@@ -63,9 +62,9 @@ export const ContactList = () => {
 };
 ```
 
-### 2. Composition Pattern
+## 🔄 Composition Pattern
 
-#### Problème - Composant Monolithique
+### Problème - Composant Monolithique
 ```typescript
 // ❌ Éviter - Trop de responsabilités
 const ContactManager = ({ 
@@ -91,7 +90,7 @@ const ContactManager = ({
 };
 ```
 
-#### Solution - Composition
+### Solution - Composition
 ```typescript
 // ✅ Préféré - Composition flexible
 const ContactManager = ({ children }: { children: React.ReactNode }) => (
@@ -127,7 +126,7 @@ const ContactManagerContent = ({ children }: { children: React.ReactNode }) => (
 </ContactManager>
 ```
 
-### 3. Render Props Pattern
+## 📊 Render Props Pattern
 
 ```typescript
 // Pattern DataRenderer
@@ -176,7 +175,7 @@ export const DataRenderer = <T,>({
 </DataRenderer>
 ```
 
-### 4. Hook Composition Pattern
+## 🎣 Hook Composition Pattern
 
 ```typescript
 // Hooks spécialisés composables
@@ -226,10 +225,9 @@ const ContactManagerPage = () => {
 };
 ```
 
-## 🔄 Patterns de Gestion d'État
+## 📋 Patterns de Gestion d'État
 
 ### 1. Local State Pattern
-
 ```typescript
 // ✅ Pour état simple et local
 const ContactForm = () => {
@@ -247,7 +245,6 @@ const ContactForm = () => {
 ```
 
 ### 2. Custom Hook State Pattern
-
 ```typescript
 // ✅ Pour logique réutilisable
 export const useContactForm = (initialData?: ContactFormData) => {
@@ -313,7 +310,6 @@ export const useContactForm = (initialData?: ContactFormData) => {
 ```
 
 ### 3. Server State Pattern (React Query)
-
 ```typescript
 // ✅ Pour données serveur
 export const useContacts = () => {
@@ -348,125 +344,9 @@ export const useContactMutations = () => {
 };
 ```
 
-## 🎨 UI Patterns
-
-### 1. Compound Components Pattern
-
-```typescript
-// Composant principal avec contexte
-const ContactCard = ({ contact, children }: ContactCardProps) => {
-  const contextValue = useMemo(() => ({ contact }), [contact]);
-  
-  return (
-    <ContactCardContext.Provider value={contextValue}>
-      <div className="border rounded-lg p-4 space-y-3">
-        {children}
-      </div>
-    </ContactCardContext.Provider>
-  );
-};
-
-// Sous-composants
-ContactCard.Header = ({ children }: { children: React.ReactNode }) => {
-  const { contact } = useContactCardContext();
-  return (
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="font-semibold">{contact.name}</h3>
-        <p className="text-gray-600">{contact.email}</p>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-ContactCard.Actions = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex gap-2">
-    {children}
-  </div>
-);
-
-ContactCard.Badge = ({ type }: { type: string }) => (
-  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-    {type}
-  </span>
-);
-
-// Usage
-<ContactCard contact={contact}>
-  <ContactCard.Header>
-    <ContactCard.Badge type={contact.type} />
-  </ContactCard.Header>
-  
-  <ContactCard.Actions>
-    <Button onClick={() => onEdit(contact)}>Éditer</Button>
-    <Button variant="destructive" onClick={() => onDelete(contact.id)}>
-      Supprimer
-    </Button>
-  </ContactCard.Actions>
-</ContactCard>
-```
-
-### 2. Polymorphic Components Pattern
-
-```typescript
-// Composant polymorphique
-interface ButtonProps<T extends React.ElementType = 'button'> {
-  as?: T;
-  variant?: 'primary' | 'secondary' | 'destructive';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
-}
-
-type ButtonPolymorphicProps<T extends React.ElementType> = ButtonProps<T> &
-  Omit<React.ComponentPropsWithoutRef<T>, keyof ButtonProps<T>>;
-
-export const Button = <T extends React.ElementType = 'button'>({
-  as,
-  variant = 'primary',
-  size = 'md',
-  className,
-  children,
-  ...props
-}: ButtonPolymorphicProps<T>) => {
-  const Component = as || 'button';
-  
-  const baseClasses = 'inline-flex items-center justify-center rounded font-medium';
-  const variantClasses = {
-    primary: 'bg-blue-500 text-white hover:bg-blue-600',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
-    destructive: 'bg-red-500 text-white hover:bg-red-600',
-  };
-  const sizeClasses = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg',
-  };
-  
-  const classes = cn(
-    baseClasses,
-    variantClasses[variant],
-    sizeClasses[size],
-    className
-  );
-  
-  return (
-    <Component className={classes} {...props}>
-      {children}
-    </Component>
-  );
-};
-
-// Usage
-<Button>Button normal</Button>
-<Button as="a" href="/contact">Lien bouton</Button>
-<Button as={Link} to="/dashboard">React Router Link</Button>
-```
-
 ## 🛡️ Error Handling Patterns
 
 ### 1. Error Boundary Pattern
-
 ```typescript
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -521,7 +401,6 @@ export class ContactErrorBoundary extends Component<
 ```
 
 ### 2. Async Error Pattern
-
 ```typescript
 export const useAsyncError = () => {
   const [error, setError] = useState<Error | null>(null);
@@ -572,149 +451,4 @@ const ContactList = () => {
   
   // ...
 };
-```
-
-## 🚀 Performance Patterns
-
-### 1. Memoization Pattern
-
-```typescript
-// Memoization des composants coûteux
-const ContactCard = React.memo(({ 
-  contact, 
-  onEdit, 
-  onDelete 
-}: ContactCardProps) => {
-  // Memoization des callbacks
-  const handleEdit = useCallback(() => {
-    onEdit(contact);
-  }, [contact, onEdit]);
-  
-  const handleDelete = useCallback(() => {
-    onDelete(contact.id);
-  }, [contact.id, onDelete]);
-  
-  // Memoization des calculs coûteux
-  const displayName = useMemo(() => {
-    return `${contact.firstName} ${contact.lastName}`.trim();
-  }, [contact.firstName, contact.lastName]);
-  
-  return (
-    <div className="border rounded p-4">
-      <h3>{displayName}</h3>
-      <p>{contact.email}</p>
-      <div className="mt-2">
-        <Button onClick={handleEdit}>Éditer</Button>
-        <Button onClick={handleDelete} variant="destructive">
-          Supprimer
-        </Button>
-      </div>
-    </div>
-  );
-}, (prevProps, nextProps) => {
-  // Comparaison personnalisée pour éviter les re-renders inutiles
-  return (
-    prevProps.contact.id === nextProps.contact.id &&
-    prevProps.contact.updatedAt === nextProps.contact.updatedAt
-  );
-});
-```
-
-### 2. Virtual Scrolling Pattern
-
-```typescript
-// Pour de grandes listes
-import { VariableSizeList as List } from 'react-window';
-
-interface VirtualContactListProps {
-  contacts: Contact[];
-  onEdit: (contact: Contact) => void;
-  onDelete: (id: string) => void;
-}
-
-const VirtualContactList = ({ contacts, onEdit, onDelete }: VirtualContactListProps) => {
-  const getItemSize = useCallback((index: number) => {
-    // Hauteur basée sur le contenu du contact
-    const contact = contacts[index];
-    return contact.description ? 120 : 80;
-  }, [contacts]);
-  
-  const ContactItem = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const contact = contacts[index];
-    
-    return (
-      <div style={style}>
-        <ContactCard
-          contact={contact}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      </div>
-    );
-  };
-  
-  return (
-    <List
-      height={600}
-      itemCount={contacts.length}
-      itemSize={getItemSize}
-      width="100%"
-    >
-      {ContactItem}
-    </List>
-  );
-};
-```
-
-## 📚 Pattern Summary
-
-### Quand Utiliser Chaque Pattern
-
-| Pattern | Cas d'Usage | Avantages |
-|---------|-------------|-----------|
-| **Composition** | Composants flexibles et réutilisables | Réutilisabilité, maintenabilité |
-| **Render Props** | Logique réutilisable avec UI flexible | Séparation logique/présentation |
-| **Custom Hooks** | État et logique réutilisables | Testabilité, réutilisabilité |
-| **Compound Components** | APIs de composants intuitives | API propre, flexibilité |
-| **Error Boundaries** | Gestion d'erreurs robuste | Isolation des erreurs |
-| **Memoization** | Optimisation des performances | Performance, évite re-renders |
-
-### Anti-Patterns à Éviter
-
-```typescript
-// ❌ Props drilling excessif
-<Parent>
-  <Child1 data={data} onUpdate={onUpdate}>
-    <Child2 data={data} onUpdate={onUpdate}>
-      <Child3 data={data} onUpdate={onUpdate} />
-    </Child2>
-  </Child1>
-</Parent>
-
-// ✅ Context ou composition
-<DataProvider value={{ data, onUpdate }}>
-  <Parent>
-    <Child1>
-      <Child2>
-        <Child3 />
-      </Child2>
-    </Child1>
-  </Parent>
-</DataProvider>
-
-// ❌ Composants trop larges
-const MegaComponent = () => {
-  // 500+ lignes de code
-  // Multiples responsabilités
-};
-
-// ✅ Décomposition
-const ContactManager = () => (
-  <div>
-    <ContactHeader />
-    <ContactFilters />
-    <ContactList />
-    <ContactPagination />
-  </div>
-);
 ```
