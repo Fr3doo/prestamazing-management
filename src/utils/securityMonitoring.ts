@@ -13,91 +13,60 @@ export class SecurityMonitorImpl implements ISecurityService {
     return SecurityMonitorImpl.instance;
   }
 
-  async logEvent(event: SecurityEvent): Promise<void> {
-    try {
-      // Add timestamp and session info
-      const enrichedEvent = {
-        ...event,
-        timestamp: new Date().toISOString(),
-        session_id: this.getSessionId(),
-        ip_address: event.ip_address || 'unknown',
-        user_agent: event.user_agent || navigator.userAgent.substring(0, 500)
-      };
+  async logLoginAttempt(success: boolean, email?: string, error?: string): Promise<void> {
+    const event: SecurityEvent = {
+      event_type: success ? 'login_success' : 'login_failed',
+      details: {
+        email: email ? this.hashEmail(email) : 'unknown',
+        error: error || null
+      },
+      timestamp: new Date().toISOString()
+    };
 
+    await this.logEvent(event);
+  }
+
+  async logLogout(userId?: string): Promise<void> {
+    const event: SecurityEvent = {
+      event_type: 'logout',
+      user_id: userId,
+      details: {},
+      timestamp: new Date().toISOString()
+    };
+
+    await this.logEvent(event);
+  }
+
+  getRecentEvents(limit: number = 50): SecurityEvent[] {
+    return this.events.slice(-limit);
+  }
+
+  private async logEvent(event: SecurityEvent): Promise<void> {
+    try {
       // Store locally for immediate access
-      this.events.push(enrichedEvent);
+      this.events.push(event);
 
       // Try to persist to database (gracefully handle if table doesn't exist)
       try {
-        await supabase.from('security_events').insert([enrichedEvent]);
+        await supabase.from('security_events').insert([{
+          ...event,
+          session_id: this.getSessionId(),
+          ip_address: 'unknown',
+          user_agent: navigator.userAgent.substring(0, 500)
+        }]);
       } catch (dbError) {
         // Silently fail if table doesn't exist yet
         console.warn('Security events table not available:', dbError);
       }
 
-      // Log high severity events to console for immediate attention
-      if (event.severity === 'high' || event.severity === 'critical') {
-        console.warn('High severity security event:', enrichedEvent);
+      // Log failed login attempts to console for immediate attention
+      if (event.event_type === 'login_failed') {
+        console.warn('Login failed:', event);
       }
 
     } catch (error) {
       console.error('Failed to log security event:', error);
     }
-  }
-
-  async logLoginAttempt(success: boolean, email?: string, error?: string): Promise<void> {
-    await this.logEvent({
-      event_type: success ? 'login_success' : 'login_failed',
-      details: {
-        email: email ? this.hashEmail(email) : 'unknown',
-        error: error || null,
-        timestamp: new Date().toISOString()
-      },
-      severity: success ? 'low' : 'medium'
-    });
-  }
-
-  async logAdminAction(action: string, resource: string, details: Record<string, any>): Promise<void> {
-    await this.logEvent({
-      event_type: 'admin_action',
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      details: {
-        action,
-        resource,
-        ...details,
-        timestamp: new Date().toISOString()
-      },
-      severity: 'medium'
-    });
-  }
-
-  async logSuspiciousActivity(activity: string, details: Record<string, any>): Promise<void> {
-    await this.logEvent({
-      event_type: 'suspicious_activity',
-      details: {
-        activity,
-        ...details,
-        timestamp: new Date().toISOString()
-      },
-      severity: 'high'
-    });
-  }
-
-  async logFormSubmission(formType: string, success: boolean, details: Record<string, any>): Promise<void> {
-    await this.logEvent({
-      event_type: 'form_submission',
-      details: {
-        form_type: formType,
-        success,
-        ...details,
-        timestamp: new Date().toISOString()
-      },
-      severity: 'low'
-    });
-  }
-
-  getRecentEvents(limit: number = 50): SecurityEvent[] {
-    return this.events.slice(-limit);
   }
 
   private getSessionId(): string {
@@ -110,7 +79,6 @@ export class SecurityMonitorImpl implements ISecurityService {
   }
 
   private hashEmail(email: string): string {
-    // Simple hash for privacy (in production, use proper hashing)
     const parts = email.split('@');
     if (parts.length === 2) {
       const username = parts[0].length > 2 ? parts[0].substring(0, 2) + '***' : '***';

@@ -28,7 +28,9 @@ export class AuthServiceImpl implements IAuthService {
   }
 
   async signOut(): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
     await supabase.auth.signOut();
+    await securityMonitor.logLogout(user?.id);
     eventBus.emit('auth:logout');
   }
 
@@ -49,11 +51,7 @@ export class AuthServiceImpl implements IAuthService {
         // Note: isAdmin sera déterminé plus tard par useAdminCheck
         eventBus.emit('auth:login-success', { userId: session.user.id, isAdmin: false });
       } else if (event === 'SIGNED_OUT') {
-        await securityMonitor.logEvent({
-          event_type: 'login_success',
-          details: { action: 'logout' },
-          severity: 'low'
-        });
+        await securityMonitor.logLogout(session?.user?.id);
         eventBus.emit('auth:logout');
       }
       
