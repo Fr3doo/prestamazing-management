@@ -27,11 +27,16 @@
 - **Description** :  
   1. Contexte et objectif en français
   2. Étapes pour tester localement
-  3. Impact éventuel sur les autres services/composants
+  3. Impact éventuel sur les autres services/composants/agents
   4. Captures d'écran si changements UI
-  5. Résultats des tests : `npm run test` et `npm run lint`
-- Inclure des traces d'exécution ou extraits d'erreurs si besoin
-- Vérifier que tous les tests passent avant ouverture
+  5. Avant d’ouvrir la PR : Résultats des tests : `npm run test` et `npm run lint`
+      - Obligatoire :
+          - Le resultat des deux tests doivent être en succés pour ouvrir la PR.
+          - Inclure des traces d'exécution ou extraits d'erreurs si besoin
+          - Vérifier que tous les tests passent avant ouverture
+- 6. CodecovIA : ajouter à la fin du commentaire PR :
+	    - @codecov-ai-reviewer review
+	    - @codecov-ai-reviewer test
 
 ## 4. Codex/ChatGPT/Claude/Lovable Usage Tips
 > 🛠️ Conseils pour guider l'IA dans ce repo  
