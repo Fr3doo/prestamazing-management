@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useServices } from '@/providers/ServiceProvider';
 import { useRepositories } from '@/hooks/useRepositories';
@@ -9,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X, ExternalLink } from 'lucide-react';
 import { useFormFields } from '@/hooks/useFormFields';
+import { PartnerSelectors } from '@/utils/selectors';
 
 interface Partner {
   id: string;
@@ -28,9 +28,10 @@ interface PartnerFormProps {
 
 const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
   const {
-    fields: formData,
+    getFieldValue,
     setField,
-    setFields,
+    updateFields,
+    validateField,
   } = useFormFields({
     partner_name: '',
     website_url: '',
@@ -45,41 +46,56 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
 
   useEffect(() => {
     if (partner) {
-      setFields({
-        partner_name: partner.partner_name,
-        website_url: partner.website_url || '',
+      const partnerDisplay = PartnerSelectors.getPartnerDisplay(partner);
+      updateFields({
+        partner_name: partnerDisplay.name,
+        website_url: partnerDisplay.websiteUrl || '',
       });
-      setLogoPreview(partner.logo_url);
+      setLogoPreview(partnerDisplay.logoUrl);
     }
-  }, [partner, setFields]);
+  }, [partner, updateFields]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Getters encapsulés
+  const getPartnerName = () => getFieldValue('partner_name');
+  const getWebsiteUrl = () => getFieldValue('website_url');
 
-    // Vérifier le type de fichier
+  // Validation encapsulée
+  const isFormValid = () => {
+    const hasRequiredName = validateField('partner_name', (value) => Boolean(value.trim()));
+    const hasRequiredLogo = Boolean(partner) || Boolean(logoFile);
+    return hasRequiredName && hasRequiredLogo;
+  };
+
+  const validateFileUpload = (file: File): boolean => {
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Erreur",
         description: "Veuillez sélectionner un fichier image",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    // Vérifier la taille (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: "Erreur",
         description: "L'image ne doit pas dépasser 2MB",
         variant: "destructive",
       });
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!validateFileUpload(file)) return;
 
     setLogoFile(file);
     
-    // Créer une preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setLogoPreview(e.target?.result as string);
@@ -94,22 +110,27 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.partner_name.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le nom du partenaire est requis",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!partner && !logoFile) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner un logo",
-        variant: "destructive",
-      });
-      return;
+    if (!isFormValid()) {
+      const missingName = !validateField('partner_name', (value) => Boolean(value.trim()));
+      const missingLogo = !partner && !logoFile;
+      
+      if (missingName) {
+        toast({
+          title: "Erreur",
+          description: "Le nom du partenaire est requis",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (missingLogo) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez sélectionner un logo",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -117,18 +138,21 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
     try {
       let logoUrl = partner?.logo_url || '';
 
-      // Upload du nouveau logo si nécessaire
       if (logoFile) {
         setUploading(true);
         logoUrl = await uploadLogo(logoFile);
         setUploading(false);
       }
 
+      const formData = {
+        partner_name: getPartnerName().trim(),
+        website_url: getWebsiteUrl().trim() || null,
+        logo_url: logoUrl,
+      };
+
       if (partner) {
         await partnerRepository.updatePartner(partner.id, {
-          partner_name: formData.partner_name.trim(),
-          website_url: formData.website_url.trim() || null,
-          logo_url: logoUrl,
+          ...formData,
           updated_at: new Date().toISOString(),
         });
 
@@ -139,9 +163,7 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
       } else {
         const nextOrder = await partnerService.getNextDisplayOrder();
         await partnerRepository.createPartner({
-          partner_name: formData.partner_name.trim(),
-          website_url: formData.website_url.trim() || null,
-          logo_url: logoUrl,
+          ...formData,
           display_order: nextOrder,
         });
 
@@ -170,13 +192,17 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
     setLogoPreview('');
   };
 
+  // Méthodes d'affichage encapsulées
+  const hasWebsitePreview = () => Boolean(getWebsiteUrl());
+  const getWebsitePreviewUrl = () => getWebsiteUrl();
+
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
         <Label htmlFor="partner_name">Nom du partenaire *</Label>
         <Input
           id="partner_name"
-          value={formData.partner_name}
+          value={getPartnerName()}
           onChange={(e) => setField('partner_name', e.target.value)}
           required
           placeholder="Nom de l'entreprise partenaire"
@@ -188,13 +214,13 @@ const PartnerForm = ({ partner, onSuccess, onCancel }: PartnerFormProps) => {
         <Input
           id="website_url"
           type="url"
-          value={formData.website_url}
+          value={getWebsiteUrl()}
           onChange={(e) => setField('website_url', e.target.value)}
           placeholder="https://www.exemple.com"
         />
-        {formData.website_url && (
+        {hasWebsitePreview() && (
           <a
-            href={formData.website_url}
+            href={getWebsitePreviewUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mt-1"

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useRepositories } from '@/hooks/useRepositories';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStandardToast } from '@/hooks/useStandardToast';
 import { useFormFields } from '@/hooks/useFormFields';
+import { ContactSelectors } from '@/utils/selectors';
 
 interface ContactInfo {
   id: string;
@@ -25,9 +27,10 @@ interface ContactInfoFormProps {
 
 const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps) => {
   const {
-    fields: formData,
+    getFieldValue,
     setField,
-    setFields,
+    updateFields,
+    validateField,
   } = useFormFields({
     type: '',
     value: '',
@@ -50,20 +53,31 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
 
   useEffect(() => {
     if (contact) {
-      setFields({
+      updateFields({
         type: contact.type,
         value: contact.value,
         label: contact.label || '',
       });
     }
-  }, [contact, setFields]);
+  }, [contact, updateFields]);
 
   const { contactRepository } = useRepositories();
+
+  // Validation encapsulée
+  const isFormValid = () => {
+    return validateField('type', (value) => Boolean(value.trim())) &&
+           validateField('value', (value) => Boolean(value.trim()));
+  };
+
+  // Getters encapsulés pour éviter le chaînage
+  const getFormType = () => getFieldValue('type');
+  const getFormValue = () => getFieldValue('value');
+  const getFormLabel = () => getFieldValue('label');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.type.trim() || !formData.value.trim()) {
+    if (!isFormValid()) {
       showError("Erreur", "Veuillez remplir tous les champs obligatoires");
       return;
     }
@@ -71,18 +85,19 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     setLoading(true);
 
     try {
+      const formData = {
+        type: getFormType().trim(),
+        value: getFormValue().trim(),
+        label: getFormLabel().trim() || null,
+      };
+
       if (contact) {
-        await contactRepository.updateContactInfo(contact.id, {
-          type: formData.type.trim(),
-          value: formData.value.trim(),
-          label: formData.label.trim() || null,
-        });
+        await contactRepository.updateContactInfo(contact.id, formData);
         showSuccess("Succès", "Information de contact mise à jour");
       } else {
         await contactRepository.createContactInfo({
-          type: formData.type.trim(),
-          value: formData.value.trim(),
-          label: formData.label.trim() || undefined,
+          ...formData,
+          label: formData.label || undefined,
         });
         showSuccess("Succès", "Information de contact créée");
       }
@@ -96,11 +111,45 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
     }
   };
 
+  // Méthodes encapsulées pour l'affichage conditionnel
+  const isMultilineField = () => {
+    const type = getFormType();
+    return type === 'hours' || type === 'address' || type === 'zone';
+  };
+
+  const getPlaceholderText = () => {
+    const type = getFormType();
+    switch (type) {
+      case 'phone':
+      case 'whatsapp':
+        return "+33 6 00 00 00 00";
+      case 'email':
+        return "contact@example.com";
+      case 'website':
+        return "https://www.example.com";
+      case 'hours':
+        return "Lundi - Vendredi: 9h00 - 19h00\nSamedi: Sur rendez-vous";
+      case 'address':
+        return "123 Rue de la Restauration\n75001 Paris, France";
+      case 'zone':
+        return "Paris et région parisienne\nDéplacements possibles dans toute la France";
+      default:
+        return "Valeur de l'information de contact";
+    }
+  };
+
+  const getInputType = () => {
+    const type = getFormType();
+    if (type === 'email') return 'email';
+    if (type === 'website') return 'url';
+    return 'text';
+  };
+
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
         <Label htmlFor="type">Type de contact *</Label>
-        <Select value={formData.type} onValueChange={(value) => setField('type', value)}>
+        <Select value={getFormType()} onValueChange={(value) => setField('type', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Sélectionnez un type" />
           </SelectTrigger>
@@ -118,7 +167,7 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
         <Label htmlFor="label">Libellé</Label>
         <Input
           id="label"
-          value={formData.label}
+          value={getFormLabel()}
           onChange={(e) => setField('label', e.target.value)}
           placeholder="ex: Téléphone principal, Email support..."
         />
@@ -129,36 +178,22 @@ const ContactInfoForm = ({ contact, onSuccess, onCancel }: ContactInfoFormProps)
 
       <div>
         <Label htmlFor="value">Valeur *</Label>
-        {formData.type === 'hours' || formData.type === 'address' || formData.type === 'zone' ? (
+        {isMultilineField() ? (
           <Textarea
             id="value"
-            value={formData.value}
+            value={getFormValue()}
             onChange={(e) => setField('value', e.target.value)}
-            placeholder={
-              formData.type === 'hours' 
-                ? "Lundi - Vendredi: 9h00 - 19h00\nSamedi: Sur rendez-vous"
-                : formData.type === 'address'
-                ? "123 Rue de la Restauration\n75001 Paris, France"
-                : "Paris et région parisienne\nDéplacements possibles dans toute la France"
-            }
+            placeholder={getPlaceholderText()}
             rows={4}
             required
           />
         ) : (
           <Input
             id="value"
-            value={formData.value}
+            value={getFormValue()}
             onChange={(e) => setField('value', e.target.value)}
-            placeholder={
-              formData.type === 'phone' || formData.type === 'whatsapp'
-                ? "+33 6 00 00 00 00"
-                : formData.type === 'email'
-                ? "contact@example.com"
-                : formData.type === 'website'
-                ? "https://www.example.com"
-                : "Valeur de l'information de contact"
-            }
-            type={formData.type === 'email' ? 'email' : formData.type === 'website' ? 'url' : 'text'}
+            placeholder={getPlaceholderText()}
+            type={getInputType()}
             required
           />
         )}
