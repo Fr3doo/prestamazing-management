@@ -1,6 +1,6 @@
 
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useErrorHandler } from '../useErrorHandler';
 
 // Mock the toast hook
