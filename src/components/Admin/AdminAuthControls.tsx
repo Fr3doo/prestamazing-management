@@ -16,8 +16,10 @@ const AdminAuthControls = memo(({ className = '' }: AdminAuthControlsProps) => {
 
   return (
     <div className={className}>
-      <Button onClick={handleSignOut} variant="outline">
-        Déconnexion
+      <Button
+        onClick={() => { alert('Déconnexion cliqué'); handleSignOut(); }} 
+        variant="outline"
+      >
       </Button>
     </div>
   );
