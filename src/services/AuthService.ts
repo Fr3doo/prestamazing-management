@@ -31,9 +31,10 @@ export class AuthServiceImpl implements IAuthService {
 
   async signOut(): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Déconnexion immédiate
       await supabase.auth.signOut();
-      await securityMonitor.logLogout(user?.id);
+      // Logging en arrière-plan (sans await)
+      securityMonitor.logLogout();
       eventBus.emit('auth:logout', undefined);
       console.log('User signed out successfully');
     } catch (error) {
@@ -41,7 +42,7 @@ export class AuthServiceImpl implements IAuthService {
       throw error;
     }
   }
-
+  
   async getSession(): Promise<SessionResult> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
