@@ -13,10 +13,10 @@ const AdminAuthControls = memo(({ className = '' }: AdminAuthControlsProps) => {
   const navigate = useNavigate();
 
   const handleSignOut = useCallback(() => {
-    console.log('[AdminAuthControls] handleSignOut start');
+    console.log('[AdminAuthControls] signOut called');
     signOut()
       .then(() => {
-        console.log('[AdminAuthControls] signOut resolved');
+        console.log('[AdminAuthControls] signOut successful');
         navigate('/auth', { replace: true });
       })
       .catch(err => {
