@@ -20,8 +20,13 @@ const NonAdminMessage = ({ userEmail, onSignOut }: NonAdminMessageProps) => {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button 
-          onClick={onSignOut}
+        <Button
+          onClick={() => {
+            console.log('[Auth] logout clicked');
+            onSignOut()
+              .then(() => console.log('[Auth] handleSignOut resolved'))
+              .catch((err) => console.error('[Auth] handleSignOut error', err));
+          }}
           variant="outline"
           className="w-full"
         >
