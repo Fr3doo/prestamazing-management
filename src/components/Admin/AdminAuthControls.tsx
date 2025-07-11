@@ -10,10 +10,13 @@ interface AdminAuthControlsProps {
 
 const AdminAuthControls = memo(({ className = '' }: AdminAuthControlsProps) => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = useCallback(() => {
-    signOut();
-  }, [signOut]);
+     signOut().then(() => {
+       navigate('/auth', { replace: true });
+     });
+   }, [signOut, navigate]);
 
   return (
     <div className={className}>
