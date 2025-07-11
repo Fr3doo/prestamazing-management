@@ -2,6 +2,7 @@
 import React, { memo, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminAuthControlsProps {
   className?: string;
@@ -16,10 +17,8 @@ const AdminAuthControls = memo(({ className = '' }: AdminAuthControlsProps) => {
 
   return (
     <div className={className}>
-      <Button
-        onClick={() => { alert('Déconnexion cliqué'); handleSignOut(); }} 
-        variant="outline"
-      >
+      <Button onClick={handleSignOut} variant="outline">
+        Déconnexion
       </Button>
     </div>
   );
