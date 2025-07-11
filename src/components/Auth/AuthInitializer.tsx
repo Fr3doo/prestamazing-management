@@ -14,8 +14,8 @@ const AuthInitializer = ({
   handleSignIn, 
   handleSignOut 
 }: AuthInitializerProps) => {
-  // Affichage du loading pendant l'initialisation
-  if (!initialized) {
+  // Affichage du loading pendant l'initialisation OU tant que le check admin n'est pas terminé
+  if (!initialized || loading) {
     return <AuthLoadingScreen />;
   }
 
